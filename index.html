@@ -1001,7 +1001,441 @@ customElements.define('drag-grip', DragGrip);
 
 
 </script>
+<iframe>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Slider Puzzle</title>
+</head>
+<body>
+    <slider-puzzle></slider-puzzle>
 
+    <script>
+class SliderPuzzle extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.puzzleState = {
+            size: 4,
+            tiles: [],
+            timerStart: null,
+            timerRunning: false,
+            imageUrl: null,
+            tilePositions: [],
+            moveCount: 0,
+            estimatedMinimumMoves: 0,
+        };
+        this.render();
+    }
+
+    connectedCallback() {
+        this.loadDefaultImage();
+    }
+
+    render() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* Styles from your CSS */
+            :host {
+                display: block;
+                font-family: Arial, sans-serif;
+                background-color: #f0f0f0;
+                text-align: center;
+                width: min-content;
+                margin: 20px auto;
+            }
+
+            #puzzleGrid {
+                display: grid;
+                gap: 2px;
+                margin: 20px auto;
+                max-width: 600px;
+                border: 2px solid #2980b9;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+            }
+
+            .tile {
+                background-size: cover;
+                background-position: center;
+                cursor: pointer;
+                aspect-ratio: 1;
+                transition: transform 0.2s;
+            }
+
+            .tile:hover {
+                transform: scale(0.98);
+            }
+
+            .hidden {
+                visibility: hidden;
+            }
+
+            #controls {
+                text-align: center;
+                margin: 20px;
+            }
+
+            #timer {
+                margin: 10px;
+                font-size: 18px;
+            }
+
+            #moveCount.optimal {
+                color: green;
+            }
+
+            #moveCount.good {
+                color: orange;
+            }
+
+            #moveCount.needsImprovement {
+                color: red;
+            }
+
+            #shuffleButton, #resetButton, #uploadButton {
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                margin: 5px;
+                background-color: #3498db;
+                color: white;
+                transition: background-color 0.2s;
+            }
+
+            #shuffleButton:hover, #resetButton:hover, #uploadButton:hover {
+                background-color: #2980b9;
+            }
+
+            #sizeSelector {
+                margin: 10px;
+            }
+
+            #ogimage {
+                display: flex;
+                max-width: 100%;
+                max-height: 100%;
+                margin: 10px;
+                border: 2px solid #2980b9;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0 0 0 0.2);
+                transition: transform 0.2s;
+                cursor: pointer;
+                color: black;
+                position: relative;
+                top: 0;
+                left: 0;
+                z-index: 1000;
+                float: left;
+            }
+
+            #ogimg {
+                display: none;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        `;
+
+        const template = document.createElement('template');
+        template.innerHTML = `
+            <div id="controls">
+               <div id="ogimage" title="Click to view original image">
+                HINT
+            </div>
+                <button id="shuffleButton">Shuffle</button>
+                <button id="resetButton">Reset</button>
+                <input type="file" id="uploadButton" accept="image/*">
+                <div id="sizeSelector">
+                    Puzzle Size: 
+                    <select id="puzzleSize">
+                        <option value="3">3 x 3</option>
+                        <option value="4" selected>4 x 4</option>
+                        <option value="5">5 x 5</option>
+                    </select>
+                </div>
+                            </div>            
+                <div id="timer">Elapsed Time: 00:00</div>
+                                <img id="ogimg" src="https://picsum.photos/600" alt="Original Image" />
+
+            <div id="puzzleGrid"></div>
+            <div id="moveCount">Moves Made: 0</div>
+
+        `;
+
+        this.shadowRoot.appendChild(style);
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        const shadow = this.shadowRoot;
+        shadow.getElementById('shuffleButton').addEventListener('click', () => this.shufflePuzzle());
+        shadow.getElementById('resetButton').addEventListener('click', () => {
+            this.initializeTiles();
+            this.initializePuzzle();
+            this.resetTimer();
+        });
+        shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
+        shadow.getElementById('puzzleSize').addEventListener('change', () => this.changePuzzleSize());
+
+        shadow.getElementById('ogimage').addEventListener('click', () => {
+            const ogimg = shadow.getElementById('ogimg');
+            const ogimage = shadow.getElementById('ogimage');
+            ogimage.title = ogimage.title == 'Click to hide original image' ? 'Click to view original image' : 'Click to hide original image';
+            ogimage.style.backgroundColor = ogimage.style.backgroundColor === 'limegreen' ? 'darkgreen' : 'limegreen';
+            ogimg.style.display = ogimg.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    initializeTiles() {
+        const totalTiles = this.puzzleState.size * this.puzzleState.size;
+        this.puzzleState.tiles = [];
+        for (let i = 1; i < totalTiles; i++) {
+            this.puzzleState.tiles.push(i);
+        }
+        this.puzzleState.tiles.push(0); // Empty tile
+        this.puzzleState.tilePositions = [...this.puzzleState.tiles];
+    }
+
+    updateGridStyle() {
+        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
+        puzzleGrid.style.gridTemplateColumns = `repeat(${this.puzzleState.size}, 1fr)`;
+        puzzleGrid.style.gridTemplateRows = `repeat(${this.puzzleState.size}, 1fr)`;
+    }
+
+    initializePuzzle() {
+        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
+        puzzleGrid.innerHTML = '';
+        this.updateGridStyle();
+
+        this.puzzleState.tilePositions.forEach((value, index) => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+
+            if (value === 0) {
+                tile.classList.add('hidden');
+            } else {
+                const row = Math.floor((value - 1) / this.puzzleState.size);
+                const col = (value - 1) % this.puzzleState.size;
+                tile.style.backgroundImage = `url(${this.puzzleState.imageUrl})`;
+                tile.style.backgroundSize = `${this.puzzleState.size * 100}% ${this.puzzleState.size * 100}%`;
+                tile.style.backgroundPosition = `${(col * -100) / (this.puzzleState.size - 1)}% ${(row * -100) / (this.puzzleState.size - 1)}%`;
+            }
+
+            tile.addEventListener('click', () => this.moveTile(index));
+            puzzleGrid.appendChild(tile);
+        });
+
+        this.updateMoveCountDisplay();
+    }
+
+    moveTile(index) {
+        const emptyIndex = this.puzzleState.tilePositions.indexOf(0);
+        const size = this.puzzleState.size;
+
+        const rowEmpty = Math.floor(emptyIndex / size);
+        const colEmpty = emptyIndex % size;
+        const rowTile = Math.floor(index / size);
+        const colTile = index % size;
+
+        const rowDiff = rowTile - rowEmpty;
+        const colDiff = colTile - colEmpty;
+
+        // Standard adjacent move
+        if (Math.abs(rowDiff) + Math.abs(colDiff) === 1) {
+            [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
+            this.puzzleState.moveCount++;
+            this.initializePuzzle();
+            this.updateMoveCountDisplay();
+            this.checkWinCondition();
+        } 
+        // Special wrap-around moves
+        else if (
+            (colEmpty === size - 1 && rowEmpty < size - 1 && colTile === 0 && rowTile === rowEmpty + 1) ||
+            (colEmpty === 0 && rowEmpty > 0 && colTile === size - 1 && rowTile === rowEmpty - 1)
+        ) {
+            [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
+            this.puzzleState.moveCount++;
+            this.initializePuzzle();
+            this.updateMoveCountDisplay();
+            this.checkWinCondition();
+        } else {
+            console.log("Invalid move");
+        }
+    }
+
+    shufflePuzzle() {
+        do {
+            for (let i = this.puzzleState.tilePositions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.puzzleState.tilePositions[i], this.puzzleState.tilePositions[j]] = [this.puzzleState.tilePositions[j], this.puzzleState.tilePositions[i]];
+            }
+        } while (!this.isSolvable());
+        this.initializePuzzle();
+        this.puzzleState.moveCount = 0;
+        this.calculateEstimatedMinimumMoves();
+        this.updateMoveCountDisplay();
+        this.resetTimer();
+    }
+
+    isSolvable() {
+        const inversionCount = this.getInversionCount(this.puzzleState.tilePositions);
+        const size = this.puzzleState.size;
+        if (size % 2 !== 0) {
+            return inversionCount % 2 === 0;
+        } else {
+            const emptyRow = size - Math.floor(this.puzzleState.tilePositions.indexOf(0) / size);
+            if (emptyRow % 2 === 0) {
+                return inversionCount % 2 !== 0;
+            } else {
+                return inversionCount % 2 === 0;
+            }
+        }
+    }
+
+    getInversionCount(arr) {
+        let invCount = 0;
+        const tiles = arr.filter(n => n !== 0);
+        for (let i = 0; i < tiles.length - 1; i++) {
+            for (let j = i + 1; j < tiles.length; j++) {
+                if (tiles[i] > tiles[j]) {
+                    invCount++;
+                }
+            }
+        }
+        return invCount;
+    }
+
+    checkWinCondition() {
+        for (let i = 0; i < this.puzzleState.tilePositions.length - 1; i++) {
+            if (this.puzzleState.tilePositions[i] !== i + 1) {
+                return;
+            }
+        }
+        this.puzzleState.timerRunning = false;
+        setTimeout(() => {
+            const efficiencyStatus = this.getEfficiencyStatus();
+            let efficiencyMessage = '';
+            if (efficiencyStatus === 'optimal') {
+                efficiencyMessage = 'Excellent! You solved the puzzle optimally.';
+            } else if (efficiencyStatus === 'good') {
+                efficiencyMessage = 'Great job! You solved the puzzle efficiently.';
+            } else {
+                efficiencyMessage = 'Good effort! Try solving it in fewer moves next time.';
+            }
+            alert(`Congratulations! You solved the puzzle in ${this.formatTime(Date.now() - this.puzzleState.timerStart)}!\n${efficiencyMessage}`);
+            this.resetTimer();
+        }, 100);
+    }
+
+    resetTimer() {
+        this.puzzleState.timerStart = Date.now();
+        this.puzzleState.timerRunning = true;
+        this.shadowRoot.getElementById('timer').textContent = `Elapsed Time: 00:00`;
+        this.updateTimer();
+    }
+
+    updateTimer() {
+        if (this.puzzleState.timerRunning) {
+            const elapsed = Date.now() - this.puzzleState.timerStart;
+            this.shadowRoot.getElementById('timer').textContent = `Elapsed Time: ${this.formatTime(elapsed)}`;
+            requestAnimationFrame(() => this.updateTimer());
+        }
+    }
+
+    formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${minutes}:${seconds}`;
+    }
+
+    calculateEstimatedMinimumMoves() {
+        let estimatedMoves = 0;
+        const size = this.puzzleState.size;
+
+        for (let i = 0; i < this.puzzleState.tilePositions.length; i++) {
+            const tileNumber = this.puzzleState.tilePositions[i];
+            if (tileNumber !== 0) {
+                const currentRow = Math.floor(i / size);
+                const currentCol = i % size;
+                const targetRow = Math.floor((tileNumber - 1) / size);
+                const targetCol = (tileNumber - 1) % size;
+                estimatedMoves += Math.abs(currentRow - targetRow) + Math.abs(currentCol - targetCol);
+            }
+        }
+
+        this.puzzleState.estimatedMinimumMoves = estimatedMoves;
+    }
+
+    updateMoveCountDisplay() {
+        const moveCountElement = this.shadowRoot.getElementById('moveCount');
+        moveCountElement.textContent = `Moves Made: ${this.puzzleState.moveCount}`;
+
+        // Remove existing efficiency classes
+        moveCountElement.classList.remove('optimal', 'good', 'needsImprovement');
+
+        // Add the current efficiency class
+        const efficiencyStatus = this.getEfficiencyStatus();
+        moveCountElement.classList.add(efficiencyStatus);
+    }
+
+    getEfficiencyStatus() {
+        const minMoves = this.puzzleState.estimatedMinimumMoves;
+        const movesMade = this.puzzleState.moveCount;
+
+        if (movesMade <= minMoves * 2) {
+            return 'optimal';
+        } else if (movesMade <= minMoves * 4) {
+            return 'good';
+        } else {
+            return 'needsImprovement';
+        }
+    }
+
+    loadDefaultImage() {
+        this.puzzleState.imageUrl = 'https://picsum.photos/600';
+        this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
+        this.initializeTiles();
+        this.initializePuzzle();
+        this.resetTimer();
+    }
+
+    handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.puzzleState.imageUrl = e.target.result;
+                this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
+                this.initializeTiles();
+                this.initializePuzzle();
+                this.resetTimer();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    changePuzzleSize() {
+        this.puzzleState.size = parseInt(this.shadowRoot.getElementById('puzzleSize').value);
+        this.initializeTiles();
+        this.initializePuzzle();
+        this.resetTimer();
+    }
+}
+
+customElements.define('slider-puzzle', SliderPuzzle);
+
+    </script>
+</body>
+</html>
+
+</iframe>
 </body>
 
 </html>
