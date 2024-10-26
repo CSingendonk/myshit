@@ -81,8 +81,9 @@ class DiceRoller extends HTMLElement {
         const container = document.createElement('div');
         container.setAttribute('id', 'dice-container');
         container.innerHTML = `
+                        <div id="drag-grip" class="grip" style="z-index:99>⁞⁞</div>
+
             <div id="titlebar" class="titlebar">
-                <div id="drag-grip" class="grip">⁞⁞</div>
                 <span id="title">Dice Roller</span>
                 <button id="minimize-button">—</button>
                 <button id="maximize-button">🗖</button>
