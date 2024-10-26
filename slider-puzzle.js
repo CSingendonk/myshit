@@ -34,12 +34,12 @@
                         background-color: #f0f0f0;
                         text-align: center;
                         width: 100%;
-                        max-width: 700px;
-                        margin: 20px auto;
+                        max-width: 90vh
+                        margin: 2% auto;
                         color: black;
                         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                        border-radius: 10px;
-                        padding: 20px;
+                        border-radius: 1%;
+                        padding: 2%;
                         box-sizing: border-box;
                     }
 
@@ -47,16 +47,16 @@
                         display: flex;
                         flex-wrap: wrap;
                         justify-content: center;
-                        gap: 10px;
-                        margin-bottom: 20px;
+                        gap: 0.2%;
+                        margin-bottom: 0.5%;
                     }
 
                     button, select, input[type="file"] {
                         padding: 10px 15px;
-                        font-size: 16px;
+                        font-size: 1rem;
                         cursor: pointer;
                         border: none;
-                        border-radius: 5px;
+                        border-radius: 1px;
                         background-color: #3498db;
                         color: white;
                         transition: background-color 0.2s;
@@ -67,8 +67,8 @@
                     }
 
                     #timer, #moveCount {
-                        margin: 10px;
-                        font-size: 18px;
+                        margin: 0.5%;
+                        font-size: 1.1rem;
                     }
 
                     #moveCount.optimal {
@@ -87,7 +87,7 @@
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        padding: 10px;
+                        padding: 1%;
                         background-color: limegreen;
                         color: white;
                         border-radius: 5px;
@@ -115,10 +115,11 @@
                         gap: 2px;
                         margin: 0 auto;
                         width: 100%;
-                        max-width: 600px;
+                        max-width: 50vh;
                         border: 2px solid #2980b9;
                         border-radius: 10px;
                         overflow: hidden;
+                        
                         background-color: #fff;
                     }
 
@@ -131,7 +132,7 @@
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 24px;
+                        font-size: 2rem;
                         font-weight: bold;
                         color: transparent;
                         user-select: none;
