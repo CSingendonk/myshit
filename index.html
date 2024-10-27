@@ -1,10 +1,10 @@
 <html>
 
 <head>
-<title>Dice Roller</title>
+<title>Demo Page</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: Script, SimSun, Times, sans-serif;
         margin: 0;
         padding: 0;
         background-color: #f0f0f0;
@@ -13,13 +13,43 @@
     :root {
         box-sizing: border-box;
     }
-</style>
+    ul {
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            width: 100%;
+            height: fit-content;
+            }
+    li {
+        margin-left: 2%;
+        margin-right: 2%;
+    }
+    </style>
 </head>
+  <body>
 
-<body>
+    <header>
+        <ul>
+            <li>
+                <a href="#" id="sliderahref">Slider Puzzle</a>
+            </li>
+            <li>
+                <a href="#" id="diceahref">3D Dice Roller</a> 
+            </li>
+            <li>
+                <a href="https://www.github.com/csingendonk"></a>
+            </li>
+        </ul>
+    </header>
+    <slider-puzzle></slider-puzzle>
+    <script>
+
+    const sliderLink = document.getElementById('sliderahref');
+    const sliderElement = document.getElementsByTagName('slider-puzzle')[0];
+    sliderLink.addEventListener('click', (e) => {sliderElement.style.display = sliderElement.style.display === 'none' ? 'flex' : 'none';  })
 
     <script src="https://csingendonk.github.io/htmlpanels/dice-panel.js"></script>
-    <slider-puzzle id="slider-panel" draggable="true"></slider-puzzle>
+    <slider-puzzle id="slider-panel"></slider-puzzle>
     <script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
     <div style="display: flex; position: relative;">
         <dice-roller></dice-roller>
