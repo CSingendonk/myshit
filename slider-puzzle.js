@@ -1,211 +1,218 @@
-        class SliderPuzzle extends HTMLElement {
-            constructor() {
-                super();
-                this.attachShadow({ mode: 'open' });
-                this.puzzleState = {
-                    size: 4, // Default puzzle size (4x4)
-                    tiles: [],
-                    tilePositions: [],
-                    moveCount: 0,
-                    estimatedMinimumMoves: 0,
-                    timerStart: null,
-                    timerInterval: null,
-                    timerRunning: false,
-                    imageUrl: null,
-                };
-                this.render();
+
+class SliderPuzzle extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.puzzleState = {
+            size: 4, // Default puzzle size (4x4)
+            tiles: [],
+            tilePositions: [],
+            moveCount: 0,
+            estimatedMinimumMoves: 0,
+            timerStart: null,
+            timerInterval: null,
+            timerRunning: false,
+            imageUrl: null,
+        };
+        this.render();
+    }
+
+    connectedCallback() {
+        this.loadDefaultImage();
+    }
+
+    disconnectedCallback() {
+        this.stopTimer();
+    }
+
+    // Render the component's HTML and CSS
+    render() {
+        const style = document.createElement('style');
+        style.textContent = `
+
+
+            :host {
+                display: block;
+                font-family: 'Open Sans', sans-serif;
+                background-color: #ffffff;
+                text-align: center;
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto;
+                /*! color: #333; */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                box-sizing: border-box;
             }
 
-            connectedCallback() {
-                this.loadDefaultImage();
+            #controls {
+                display: flex;
+                /*! flex-wrap: nowrap; */
+                justify-content: space-evenly;
+                flex-direction: row;
+                /*! margin-bottom: 0.5%; */
+                min-width: min-content;
+                min-height: min-content;
+                width: 90vh;
+                /*! height: 2rem; */
+                max-width: 100%;
+                /*! max-height: 2.5rem; */
+                scale: 0.75;
             }
 
-            disconnectedCallback() {
-                this.stopTimer();
+
+
+            button, select, input[type="file"] {
+                padding: 10px 20px;
+                font-size: 1rem;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background-color: #3498db;
+                color: white;
+                transition: background-color 0.2s, transform 0.1s;
+                outline: outset brown 5px;
             }
 
-            // Render the component's HTML and CSS
-            render() {
-                const style = document.createElement('style');
-                style.textContent = `
-                    :host {
-                        display: block;
-                        font-family: Arial, sans-serif;
-                        background-color: #f0f0f0;
-                        text-align: center;
-                        width: 100%;
-                        max-width: 90vh
-                        margin: 2% auto;
-                        color: black;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                        border-radius: 1%;
-                        padding: 2%;
-                        box-sizing: border-box;
-                    }
-
-                    #controls {
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                        gap: 0.2%;
-                        margin-bottom: 0.5%;
-                    }
-
-                    button, select, input[type="file"] {
-                        padding: 10px 15px;
-                        font-size: 1rem;
-                        cursor: pointer;
-                        border: none;
-                        border-radius: 1px;
-                        background-color: #3498db;
-                        color: white;
-                        transition: background-color 0.2s;
-                    }
-
-                    button:hover, select:hover, input[type="file"]:hover {
-                        background-color: #2980b9;
-                    }
-
-                    #timer, #moveCount {
-                        margin: 0.5%;
-                        font-size: 1.1rem;
-                    }
-
-                    #moveCount.optimal {
-                        color: green;
-                    }
-
-                    #moveCount.good {
-                        color: orange;
-                    }
-
-                    #moveCount.needs-improvement {
-                        color: red;
-                    }
-
-                    #ogimage {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 1%;
-                        background-color: limegreen;
-                        color: white;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        transition: background-color 0.2s;
-                        margin-bottom: 10px;
-                        user-select: none;
-                    }
-
-                    #ogimage.active {
-                        background-color: darkgreen;
-                    }
-
-                    #ogimg {
-                        display: none;
-                        max-width: 100%;
-                        max-height: 300px;
-                        margin: 10px auto;
-                        border: 2px solid #2980b9;
-                        border-radius: 5px;
-                    }
-
-                    #puzzleGrid {
-                        display: grid;
-                        gap: 2px;
-                        margin: 0 auto;
-                        width: 100%;
-                        max-width: 50vh;
-                        border: 2px solid #2980b9;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        
-                        background-color: #fff;
-                    }
-
-                    .tile {
-                        background-size: cover;
-                        background-position: center;
-                        cursor: pointer;
-                        aspect-ratio: 1 / 1;
-                        transition: transform 0.2s;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 2rem;
-                        font-weight: bold;
-                        color: transparent;
-                        user-select: none;
-                    }
-
-                    .tile:hover {
-                        transform: scale(0.98);
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                    }
-
-                    .hidden {
-                        visibility: hidden;
-                        cursor: default;
-                    }
-
-                    /* Responsive Design */
-                    @media (max-width: 600px) {
-                        #puzzleGrid {
-                            max-width: 90vw;
-                        }
-                    }
-                `;
-
-                const template = document.createElement('div');
-                template.innerHTML = `
-                    <div id="ogimage" tabindex="0" aria-label="Toggle Original Image">HINT</div>
-                    <img id="ogimg" alt="Original Image" />
-                    
-                    <div id="controls">
-                        <button id="shuffleButton">Shuffle</button>
-                        <button id="resetButton">Reset</button>
-                        <input type="file" id="uploadButton" accept="image/*" aria-label="Upload Image">
-                        <label for="puzzleSize" style="display: flex; align-items: center; gap: 5px;">
-                            Size:
-                            <select name="puzzleSize" id="puzzleSize" aria-label="Select Puzzle Size">
-                                <option value="3">3 x 3</option>
-                                <option value="4" selected>4 x 4</option>
-                                <option value="5">5 x 5</option>
-                            </select>
-                        </label>
-                    </div>
-                    
-                    <div id="timer">Elapsed Time: 00:00</div>
-                    <div id="moveCount">Moves Made: 0</div>
-                    
-                    <div id="puzzleGrid" aria-label="Puzzle Grid"></div>
-                `;
-
-                this.shadowRoot.appendChild(style);
-                this.shadowRoot.appendChild(template);
-
-                this.bindEvents();
+            button:hover, select:hover, input[type="file"]:hover {
+                background-color: #2980b9;
             }
 
-            // Bind event listeners to controls and interactive elements
-            bindEvents() {
-                const shadow = this.shadowRoot;
-
-                shadow.getElementById('shuffleButton').addEventListener('click', () => this.shufflePuzzle());
-                shadow.getElementById('resetButton').addEventListener('click', () => this.resetPuzzle());
-                shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
-                shadow.getElementById('puzzleSize').addEventListener('change', () => this.changePuzzleSize());
-                shadow.getElementById('ogimage').addEventListener('click', () => this.toggleOriginalImage());
-
-                // Accessibility: Allow toggling original image via keyboard
-                shadow.getElementById('ogimage').addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.toggleOriginalImage();
-                    }
-                });
+            button:active, select:active, input[type="file"]:active {
+                transform: scale(0.98);
             }
 
+            #timer, #moveCount {
+                margin: 0px;
+                font-size: 1rem;
+                display: inline-flex;
+                border-right: 2px double red;
+                padding: 0px 5%;
+                border-left: 2px double red;
+            }
+
+            #moveCount.optimal {
+                color: green;
+            }
+
+            #moveCount.good {
+                color: orange;
+            }
+
+            #moveCount.needs-improvement {
+                color: red;
+            }
+
+            #ogimage {
+                display: contents;
+                padding: 1% 2%;
+                background-color: #2ecc71;
+                color: black;
+                /*! border-radius: 5px; */
+                cursor: help;
+                transition: all 0.2s, transform 0.1s;
+                user-select: none;
+            }
+
+            #ogimage:hover {
+                background-color: #27ae60;
+            }
+
+            #ogimage:active {
+                transform: scale(0.98);
+            }
+
+            #ogimg {
+                display: none;
+                max-width: 100%;
+                margin: 10px auto;
+                border: 2px solid #2980b9;
+                border-radius: 5px;
+            }
+
+            #puzzleGrid {
+                display: grid;
+                gap: 2px;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 500px;
+                border: 2px solid #2980b9;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #ecf0f1;
+            }
+
+            .tile {
+                background-size: cover;
+                background-position: center;
+                cursor: pointer;
+                aspect-ratio: 1 / 1;
+                transition: transform 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                font-weight: bold;
+                color: transparent;
+                user-select: none;
+            }
+
+            .tile:hover {
+                transform: scale(0.98);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .hidden {
+                visibility: hidden;
+                cursor: default;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 600px) {
+                #puzzleGrid {
+                    max-width: 90vw;
+                }
+            }
+        
+        
+        
+        `;
+
+        const template = document.createElement('div');
+        template.innerHTML = `
+            <div id="ogimage" tabindex="0" aria-label="Toggle Original Image">Show Original Image</div>
+            <img id="ogimg" alt="Original Image" />
+            
+            <div id="controls">
+                <button id="shuffleButton">Shuffle</button>
+                <button id="resetButton">Reset</button>
+                <input type="file" id="uploadButton" accept="image/*" aria-label="Upload Image">
+                <label for="puzzleSize" style="display: flex; align-items: center; gap: 5px;">
+                    Size:
+                    <select name="puzzleSize" id="puzzleSize" aria-label="Select Puzzle Size">
+                        <option value="3">3 x 3</option>
+                        <option value="4" selected>4 x 4</option>
+                        <option value="5">5 x 5</option>
+                    </select>
+                </label>
+            </div>
+            
+            <div id="timer">Elapsed Time: 00:00</div>
+            <div id="moveCount">Moves Made: 0</div>
+            
+            <div id="puzzleGrid" aria-label="Puzzle Grid"></div>
+        `;
+
+        this.shadowRoot.appendChild(style);
+        this.shadowRoot.appendChild(template);
+
+        this.bindEvents();
+    }
+
+    // The rest of your methods remain unchanged...
+    // [Include the rest of your methods here without modification]
+    
             // Initialize tiles based on current size and image
             initializeTiles() {
                 const totalTiles = this.puzzleState.size * this.puzzleState.size;
@@ -509,8 +516,29 @@
                 const isActive = ogimage.classList.toggle('active');
                 ogimg.style.display = isActive ? 'block' : 'none';
             }
-        }
 
         // Define the custom element
-        customElements.define('slider-puzzle', SliderPuzzle);
       
+    // Bind event listeners to controls and interactive elements
+    bindEvents() {
+        const shadow = this.shadowRoot;
+
+        shadow.getElementById('shuffleButton').addEventListener('click', () => this.shufflePuzzle());
+        shadow.getElementById('resetButton').addEventListener('click', () => this.resetPuzzle());
+        shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
+        shadow.getElementById('puzzleSize').addEventListener('change', () => this.changePuzzleSize());
+        shadow.getElementById('ogimage').addEventListener('click', () => this.toggleOriginalImage());
+
+        // Accessibility: Allow toggling original image via keyboard
+        shadow.getElementById('ogimage').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key == 'Backspace' || e.key == 'Esc') {
+                e.preventDefault();
+                this.toggleOriginalImage();
+            }
+        });
+    }
+}
+
+        customElements.define('slider-puzzle', SliderPuzzle);
+
+// 
