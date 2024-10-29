@@ -1,59 +1,126 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-<title>Demo Page</title>
-<style>
-    body {
-        font-family: Script, SimSun, Times, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f0f0f0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Demo Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
 
-    :root {
-        box-sizing: border-box;
-    }
-    ul {
-            display: inline-flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #6d6a6a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
             width: 100%;
-            height: fit-content;
-            }
-    li {
-        margin-left: 2%;
-        margin-right: 2%;
-    }
+            background-color: #333;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 0 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 700;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #555;
+        }
+
+        slider-puzzle,
+        dice-roller {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: #ebebeb;
+        }
+
+        .active {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+    
     </style>
 </head>
-  <body>
 
+<body>
     <header>
         <ul>
             <li>
                 <a href="#" id="sliderahref">Slider Puzzle</a>
             </li>
             <li>
-                <a href="#" id="diceahref">3D Dice Roller</a> 
+                <a href="#" id="diceahref">3D Dice Roller</a>
             </li>
             <li>
-                <a href="https://www.github.com/csingendonk"></a>
             </li>
         </ul>
     </header>
-    <script>
 
-    const sliderLink = document.getElementById('sliderahref');
-    const sliderElement = document.getElementsByTagName('slider-puzzle')[0];
-    sliderLink.addEventListener('click', (e) => {sliderElement.style.display = sliderElement.style.display === 'none' ? 'flex' : 'none';  })
-        </script>
     <slider-puzzle id="slider-panel"></slider-puzzle>
-    <script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
-    <div style="display: flex; position: relative;">
-        <dice-roller></dice-roller>
-    <script src="https://csingendonk.github.io/htmlpanels/dice-panel.js"></script>
-    </div>
+    <dice-roller id="dice-panel"></dice-roller>
 
+    <footer>
+        <a href="https://www.github.com/csingendonk" target="_blank" rel="noopener">GitHub</a>
+    </footer>
+
+    <script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
+    <script src="https://csingendonk.github.io/htmlpanels/dice-panel.js"></script>
+    <script>
+        const sliderLink = document.getElementById('sliderahref');
+        const diceLink = document.getElementById('diceahref');
+        const sliderElement = document.getElementById('slider-panel');
+        const diceElement = document.getElementById('dice-panel');
+
+        sliderLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            sliderElement.classList.toggle('active');
+            diceElement.classList.remove('active');
+            if (sliderElement.className.includes('active') || e.target == sliderLink) {
+                console.log('hi');
+            }
+        });
+
+        diceLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            diceElement.classList.toggle('active');
+            sliderElement.classList.remove('active');
+        });
+    </script>
 </body>
- 
-</html> 
+
+</html>
