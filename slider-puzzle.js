@@ -12,7 +12,7 @@ class SliderPuzzle extends HTMLElement {
             timerStart: null,
             timerInterval: null,
             timerRunning: false,
-            imageUrl: null,
+            imageUrl: 'https://picsum.photos/600'
         };
         this.render();
     }
@@ -475,7 +475,6 @@ class SliderPuzzle extends HTMLElement {
 
             // Load the default image for the puzzle
             loadDefaultImage() {
-                this.puzzleState.imageUrl = 'https://picsum.photos/600';
                 this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
                 this.initializeTiles();
                 this.initializePuzzle();
