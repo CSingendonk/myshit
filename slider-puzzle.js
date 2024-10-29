@@ -540,5 +540,3 @@ class SliderPuzzle extends HTMLElement {
 }
 
         customElements.define('slider-puzzle', SliderPuzzle);
-
-// 
