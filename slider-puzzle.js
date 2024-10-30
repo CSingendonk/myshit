@@ -28,6 +28,7 @@ class SliderPuzzle extends HTMLElement {
     render() {
         const style = document.createElement('style');
         style.textContent = `
+        
         *{background-color: transparent; color: #f00f00ff; font-family: 'Arial', sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; box-sizing: border-box; }
         #bigkahuna {
                 background-color: transparent;
@@ -170,6 +171,8 @@ class SliderPuzzle extends HTMLElement {
                 border-radius: 10px;
                 overflow: auto;
                 background-color: #ecf0f1;
+                padding: 0.5%;
+                margin-bottom: 1%;
             }
 
             .tile {
@@ -232,13 +235,16 @@ class SliderPuzzle extends HTMLElement {
                 box-sizing: border-box;
             }
 
+            #shuffleButton {
+                
+            }
+
 .first_shuffle {
     display: flex;
     position: absolute;
     float: left;
     clear: both;
-    top: 45vmin;
-    left: 4vmin;
+
     width: fit-content;
     height: fit-content;
     transform: translate(-25vmin, -45vmin), scale(0.25);
@@ -255,21 +261,100 @@ class SliderPuzzle extends HTMLElement {
     background-color: #27ae60;
 }
 .first_shuffle:active {
-    transform: scale(0.25);}
 
-    drag-grip {
-        opacity: 0;
+    transition: all 1s;
+    transform: translate(-25vmin, -45vmin), scale(0.25);
     }
 
+    drag-grip {
+        opacity: 0.5;
+    position: absolute;
+    top: 10px;
+    left: -1px;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    float: left;
+    clear: both;
+    z-index: 9999;
+    
+    }
+
+    aside {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+#infotoggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    float: right;
+    clear: both;
+    }
+
+    #puzzleInfo {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    width: fit-content;
+    height: fit-content;
+        }
+
+        input, select, label, #puzzleInfo {
+          scale: 0.8;
+        }
+        input {
+            display: flex;
+            max-width: 100px;
+        }
+
+        section > * {
+          line-height: 1;
+          margin: 0px;
+          padding: 0px;
+
+        }
+
+        section, #controls, #puzzleInfo {
+          display: contents;
+        }
+        #controls {
+          display: flex;
+          flex-direction: row;
+        }
+
+
+            
             `;
+
+        
 
         const template = document.createElement('div');
         template.id = 'bigkahuna';
         template.innerHTML = `
-            <div id="ogimage" tabindex="0" aria-label="Toggle Original Image">Show Original Image</div>
-            <img id="ogimg" alt="Original Image" />
+          <button id="infotoggle"> ℹ️</button>
+            <section id="puzzleInfo">
+
             
             <div id="controls">
+
                 <input type="file" id="uploadButton" accept="image/*" aria-label="Upload Image">
                 <label for="puzzleSize" style="display: flex; align-items: center; gap: 5px;">
                     Size:
@@ -282,7 +367,7 @@ class SliderPuzzle extends HTMLElement {
                         <option value="9">9 x 9</option>
                         <option value="8">9 x 7</option>
                     </select>
-                </label>
+                </label>                            <div id="ogimage" tabindex="0" aria-label="Toggle Original Image">Show Original Image</div>
             </div>
             <span>
             <button class="first_shuffle" id="shuffleButton">Shuffle</button>
@@ -290,20 +375,61 @@ class SliderPuzzle extends HTMLElement {
             <div id="moveCount">Moves Made: 0</div>
                 <button id="resetButton">Reset</button>
             </span>
+            </section>
+            <img id="ogimg" aria-hidden="true" style="display: none;">
             <div id="puzzleGrid" aria-label="Puzzle Grid"></div>
         `;
 
         const grip = document.createElement('drag-grip');
-        grip.setAttribute('aria-label', 'Drag to Relocate Game Panel');
+        grip.setAttribute('aria-label', 'Drag to Relocate Puzzle');
         grip.id = 'puzzleDragGrip';
         this.shadowRoot.appendChild(style);
         this.shadowRoot.appendChild(template);
         const dragScript = document.createElement('script');
         dragScript.src = '../customelements/drag-grip.js';
         this.shadowRoot.appendChild(dragScript);
+        grip.style.border = '1px solid green';
+        template.appendChild(grip);
 
-        this.shadowRoot.appendChild(grip);
         this.bindEvents();
+            // Local storage functions for game data
+            this.saveGameData = () => {
+                const gameData = {
+                    puzzleState: this.puzzleState,
+                    moveCount: this.moveCount,
+                    elapsedTime: this.elapsedTime
+                };
+                localStorage.setItem('sliderpuzzle_gamedata', JSON.stringify(gameData));
+            };
+            this.loadGameData = () => {
+                const savedData = localStorage.getItem('sliderpuzzle_gamedata');
+                if (savedData) {
+                    const gameData = JSON.parse(savedData);
+                    this.puzzleState = gameData.puzzleState;
+                    this.moveCount = gameData.moveCount;
+                    this.elapsedTime = gameData.elapsedTime;
+                    return true;
+                }
+                return false;
+            };
+
+            let idlemotioninterval = setInterval(() => {
+                this.elapsedTime++;
+                this.updateTimer();
+                if (this.shadowRoot.getElementById('shuffleButton').classList.contains('first_shuffle')) {
+                    let xORy = Math.random() > 0.5 ? 'X' : 'Y';
+                    let plusOrMinus = Math.random() > 0.5 ? '' : '-';
+                    const sb = this.shadowRoot.getElementById('shuffleButton');
+                    sb.style.transform = `rotate${xORy}(${plusOrMinus}${Math.random() * 45}deg) translate${xORy}(${Math.random() * 100}px)`;
+                    sb.style.transition = 'transform 1s linear';
+
+                }
+                else {
+                    const sb = this.shadowRoot.getElementById('shuffleButton');
+                    sb.style.transform = `rotate(0deg) translate(0px, 0px)`;
+                    clearInterval(idlemotioninterval);
+                }
+            }, 1001);
     }
 
 
@@ -364,7 +490,7 @@ class SliderPuzzle extends HTMLElement {
             tile.addEventListener('click', () => this.moveTile(index));
             puzzleGrid.appendChild(tile);
         });
-
+        const ctrls = this.shadowRoot.getElementById('controls');
         this.updateMoveCountDisplay();
     }
 
@@ -394,7 +520,7 @@ class SliderPuzzle extends HTMLElement {
         }
     }
     shufflePuzzle() {
-        if (this.shadowRoot.querySelector('#shuffleButton')) {
+        if (this.shadowRoot.querySelector('#shuffleButton') &&  this.shadowRoot.querySelector('#shuffleButton').classList.contains('first_shuffle')) {
             this.shadowRoot.querySelector('#shuffleButton').classList.remove('first_shuffle');
         }
         do {
@@ -503,6 +629,7 @@ class SliderPuzzle extends HTMLElement {
 
     // Update the timer display
     updateTimer() {
+
         if (this.puzzleState.timerRunning) {
             const elapsed = Date.now() - this.puzzleState.timerStart;
             this.updateTimerDisplay(elapsed);
@@ -612,14 +739,21 @@ class SliderPuzzle extends HTMLElement {
         const ogimage = this.shadowRoot.getElementById('ogimage');
         const isActive = ogimage.classList.toggle('active');
         ogimg.style.display = isActive ? 'block' : 'none';
+        ogimg.style.position = isActive ? 'relative' : 'absolute';
+
     }
 
+    showInfo() {
+
+        const info = this.shadowRoot.getElementById('puzzleInfo');
+        info.style.display = info.style.display === 'none' ? 'contents' : 'none';
+    }
     // Define the custom element
 
     // Bind event listeners to controls and interactive elements
     bindEvents() {
         const shadow = this.shadowRoot;
-
+        shadow.getElementById('infotoggle').addEventListener('click', () => this.showInfo());
         shadow.getElementById('shuffleButton').addEventListener('click', () => this.shufflePuzzle());
         shadow.getElementById('resetButton').addEventListener('click', () => this.resetPuzzle());
         shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
@@ -634,6 +768,6 @@ class SliderPuzzle extends HTMLElement {
             }
         });
     }
-}
-
-customElements.define('slider-puzzle', SliderPuzzle);
+    
+        }
+    customElements.define('slider-puzzle', SliderPuzzle);
