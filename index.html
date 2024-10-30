@@ -1,10 +1,13 @@
+<!DOCTYPE html>
 <html lang="en">
-
+ 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demo Page</title>
     <style>
+
+
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -56,55 +59,49 @@
             top: 90px;
             display: none;
             margin-top: 20px;
-            width: 100%;
-            max-width: 600px;
+            width: 90vmax;
+            max-width: 90vw;
+            min-width: 90vmin;
             border: 1px solid #ccc;
             border-radius: 10px;
-            overflow: hidden;
+            overflow: auto;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             background: #ebebeb;
+            margin-bottom: 5%;
         }
 
         slider-puzzle.active {
-            display: inherit;
+            display: block;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            max-width: 90vmax;
-            max-height: 90vmax;
-            margin: 0 auto;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            width: 75vw;
+            max-width: 90vmin;
+            max-height: 90vmin;
+            overflow: scroll;
+            box-shadow: 1 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100vmax;
+            background-color: transparent;
         }
 
-         slider-puzzle #controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #ccc;
-            scale: 0.25;
-        }
+
         footer {
             position: fixed;
             bottom: 0;
             width: 100%;
             background-color: #333;
-            padding: 10px;
             text-align: center;
             color: #fff;
-            font-size: 14px;
-            font-weight: 700;
         }
             drag-grip {
         background-color:transparent;
         width: 100%;
     }
+    
+    
+    
+    
+    
     
     </style>
 </head>
@@ -130,7 +127,9 @@
         <a href="https://www.github.com/csingendonk" target="_blank" rel="noopener">&copy; CSingendonk
         </a>
     </footer>
-<script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
+
+    <script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
+    <!-- <script src="../customelements/sliderpuzzle.js" ></script> -->
 
     <script src="https://csingendonk.github.io/htmlpanels/dice-panel.js"></script>
     <script>
