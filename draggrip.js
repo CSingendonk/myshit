@@ -16,9 +16,9 @@ class DragGrip extends HTMLElement {
         this.style.position = 'absolute';
         this.style.top = '0';
         this.style.left = '0';
-        this.style.width = '0.9rem';
-        this.style.height = '0.9rem';
-        this.textContent = `⁛`
+        this.style.width = 'auto';
+        this.style.height = '1.5rem';
+        this.textContent = `⁞⁝⁚⁚`
         this.style.fontSize = '0.75rem';
 
         // Ensure the parent is positioned absolutely for movement to work
