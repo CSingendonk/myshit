@@ -5,15 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demo Page</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
 
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 1px;
             background-color: #6d6a6a;
-            display: flex;
+            display: contents;
             flex-direction: column;
             align-items: center;
         }
@@ -21,7 +20,7 @@
         header {
             width: 100%;
             background-color: #333;
-            padding: 15px 0;
+            padding: 0px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -30,30 +29,32 @@
 
         ul {
             display: flex;
-            justify-content: center;
-            list-style: none;
-            padding: 0;
+            justify-content: stretch;
+            list-style:symbols("⇵");
+            padding: 0.5%;
+            margin: 0;
+
         }
 
         li {
-            margin: 0 20px;
+            margin: 1% auto;
         }
 
         a {
-            text-decoration: none;
+            text-decoration: underline;
             color: #fff;
             font-weight: 700;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            padding: 1%;
+            transition: all 0.3s;
         }
 
         a:hover {
-            background-color: #555;
+            background-color: #ffffff;
         }
 
         slider-puzzle,
         dice-roller {
+            top: 90px;
             display: none;
             margin-top: 20px;
             width: 100%;
@@ -65,19 +66,49 @@
             background: #ebebeb;
         }
 
-        .active {
-            display: flex !important;
+        slider-puzzle.active {
+            display: inherit;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
             transition: all 0.3s;
+            max-width: 90vmax;
+            max-height: 90vmax;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 75vw;
         }
+
+         slider-puzzle #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ccc;
+            scale: 0.25;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+            drag-grip {
+        background-color:transparent;
+        width: 100%;
+    }
     
     </style>
 </head>
-
-<body>
     <header>
         <ul>
             <li>
@@ -85,27 +116,30 @@
             </li>
             <li>
                 <a href="#" id="diceahref">3D Dice Roller</a>
-            </li>
-            <li>
-            </li>
+            </li> 
         </ul>
-    </header>
+    </header> 
+<body>
 
-    <slider-puzzle id="slider-panel"></slider-puzzle>
-    <dice-roller id="dice-panel"></dice-roller>
+<div>
+    <slider-puzzle id="slider-panel"></slider-puzzle><drag-grip style="background-color: transparent; opacity: 0;"></drag-grip>
+    <dice-roller id="dice-panel">
+    </dice-roller>
+</div>
 
     <footer>
-        <a href="https://www.github.com/csingendonk" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.github.com/csingendonk" target="_blank" rel="noopener">&copy; CSingendonk
+        </a>
     </footer>
+<script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
 
-    <script src="https://csingendonk.github.io/htmlpanels/slider-puzzle.js"></script>
     <script src="https://csingendonk.github.io/htmlpanels/dice-panel.js"></script>
     <script>
         const sliderLink = document.getElementById('sliderahref');
         const diceLink = document.getElementById('diceahref');
         const sliderElement = document.getElementById('slider-panel');
         const diceElement = document.getElementById('dice-panel');
-
+ 
         sliderLink.addEventListener('click', (e) => {
             e.preventDefault();
             sliderElement.classList.toggle('active');
@@ -121,6 +155,6 @@
             sliderElement.classList.remove('active');
         });
     </script>
-</body>
+</body> 
 
 </html>
