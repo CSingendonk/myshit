@@ -1,3 +1,4 @@
+
 class SliderPuzzle extends HTMLElement {
     constructor() {
         super();
@@ -28,6 +29,320 @@ class SliderPuzzle extends HTMLElement {
     render() {
         const style = document.createElement('style');
         style.textContent = `
+        
+        *{background-color: transparent; color: #f00f00ff; font-family: 'Arial', sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; box-sizing: border-box; }
+        #bigkahuna {
+                background-color: transparent;
+                min-width: 100%;
+
+
+            
+        }
+
+        #slider-panel {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                margin: 0 auto;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+                background: pink;
+            }
+
+            #slider-panel #controls {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                background-color: #f5f5f5;
+                border-bottom: 1px solid #ccc;
+                scale: 0.25;
+            }
+            :host {
+                display: block;
+                font-family: 'Open Sans', sans-serif;
+                background-color: #00000001;
+                text-align: center;
+                width: fit-content;
+                max-width: 90vmin;
+                margin: 0 auto;
+                /*! color: #333; */
+                box-shadow: 10px 4px 8px rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+                padding: 1%;
+                box-sizing: border-box;
+            }
+
+            #controls {
+                display: flex;
+                justify-content: stretch;
+                flex-direction: row;
+                min-width: 50vmin;
+                width: 75vmin;
+                margin: 0 auto;
+                margin-bottom: 10px;
+                align-items: stretch;
+                justify-content: safe;
+
+            }
+
+
+
+            button, select, input[type="file"] {
+                padding:  2px 1% 2px 1%;
+                font-size: 1rem;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background-color: #3498db;
+                color: white;
+                transition: background-color 0.2s, transform 0.1s;
+                outline: outset brown 0.5px;
+            }
+
+            button:hover, select:hover, input[type="file"]:hover {
+                background-color: #2980b9;
+            }
+
+            button:active, select:active, input[type="file"]:active {
+                transform: scale(0.98);
+            }
+
+            #timer, #moveCount {
+                margin: 0px;
+                font-size: 1rem;
+                display: inline-flex;
+                border-right: 2px double red;
+                padding: 0px 5%;
+                border-left: 2px double red;
+            }
+
+            #moveCount.optimal {
+                color: green;
+            }
+
+            #moveCount.good {
+                color: orange;
+            }
+
+            #moveCount.needs-improvement {
+                color: red;
+            }
+
+            #ogimage {
+                display: contents;
+                padding: 1% 2%;
+                background-color: #2ecc71;
+                color: black;
+                /*! border-radius: 5px; */
+                cursor: help;
+                transition: all 0.2s, transform 0.1s;
+                user-select: none;
+            }
+
+            #ogimage:hover {
+                background-color: #27ae60;
+            }
+
+            #ogimage:active {
+                transform: scale(0.98);
+            }
+
+            #ogimg {
+                display: none;
+                max-width: 100%;
+                margin: 1% auto;
+                max-height: 90vmin;
+                border: 2px solid #2980b9;
+                border-radius: 5px;
+                box-shadow: 10px 4px 8px 10 rgba(10, 10, 10, 0.4);
+            }
+
+            #puzzleGrid {
+                display: grid;
+                gap: 2px;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 90vmin;
+                border: 2px solid #2980b9;
+                border-radius: 10px;
+                overflow: auto;
+                background-color: #ecf0f1;
+                padding: 0.5%;
+                margin-bottom: 1%;
+            }
+
+            .tile {
+                background-size: cover;
+                background-position: center;
+                cursor: src("https://picsum.photos/600");
+                aspect-ratio: 1 / 1;
+                transition: transform 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                font-weight: bold;
+                color: transparent;
+                user-select: none;
+            }
+
+            .tile:hover {
+                transform: scale(0.98);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .hidden {
+                visibility: hidden;
+                cursor: default;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 75vmin) {
+                #puzzleGrid {
+                    max-width: 90vmin;
+                }
+            }
+
+            span {
+                margin: 0 5px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                font-weight: bold;
+                flex-wrap: nowrap;
+                flex-direction: row;
+            }
+
+
+            slider-puzzle {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                max-width: 90vmin;
+                margin: 0 auto;
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            :root {
+                box-sizing: border-box;
+            }
+
+            #shuffleButton {
+                
+            }
+
+.first_shuffle {
+    display: flex;
+    position: absolute;
+    float: left;
+    clear: both;
+
+    width: fit-content;
+    height: fit-content;
+    transform: translate(-25vmin, -45vmin), scale(0.25);
+    transition: all 0.75s;
+    font-size: 4rem;
+    background-color: #2ecc71;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.first_shuffle:hover {
+    background-color: #27ae60;
+}
+.first_shuffle:active {
+
+    transition: all 1s;
+    transform: translate(-25vmin, -45vmin), scale(0.25);
+    }
+
+    drag-grip {
+        opacity: 0.5;
+    position: absolute;
+    top: 10px;
+    left: -1px;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    float: left;
+    clear: both;
+    z-index: 9999;
+    
+    }
+
+    aside {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+#infotoggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    float: right;
+    clear: both;
+    }
+
+    #puzzleInfo {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    width: fit-content;
+    height: fit-content;
+        }
+
+        input, select, label, #puzzleInfo {
+          scale: 0.8;
+        }
+        input {
+            display: flex;
+            max-width: 100px;
+        }
+
+        section > * {
+          line-height: 1;
+          margin: 0px;
+          padding: 0px;
+
+        }
+
+        section, #controls, #puzzleInfo {
+          display: contents;
+        }
+        #controls {
+          display: flex;
+          flex-direction: row;
+        }
+
+
         
         *{background-color: transparent; color: #f00f00ff; font-family: 'Arial', sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; box-sizing: border-box; }
         #bigkahuna {
@@ -341,6 +656,8 @@ class SliderPuzzle extends HTMLElement {
         }
 
 
+            
+            
             
             `;
 
