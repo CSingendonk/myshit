@@ -1,4 +1,3 @@
-
 class SliderPuzzle extends HTMLElement {
     constructor() {
         super();
@@ -29,42 +28,70 @@ class SliderPuzzle extends HTMLElement {
     render() {
         const style = document.createElement('style');
         style.textContent = `
+        *{background-color: transparent; color: #f00f00ff; font-family: 'Arial', sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; box-sizing: border-box; }
+        #bigkahuna {
+                background-color: transparent;
 
 
+            
+        }
+
+        #slider-panel {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                margin: 0 auto;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+                background: pink;
+            }
+
+            #slider-panel #controls {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                background-color: #f5f5f5;
+                border-bottom: 1px solid #ccc;
+                scale: 0.25;
+            }
             :host {
                 display: block;
                 font-family: 'Open Sans', sans-serif;
-                background-color: #ffffff;
+                background-color: #00000001;
                 text-align: center;
-                width: 100%;
-                max-width: 600px;
+                width: fit-content;
+                max-width: 90vmin;
                 margin: 0 auto;
                 /*! color: #333; */
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                box-shadow: 10px 4px 8px rgba(0, 0, 0, 0.5);
                 border-radius: 10px;
-                padding: 20px;
+                padding: 1%;
                 box-sizing: border-box;
             }
 
             #controls {
                 display: flex;
-                /*! flex-wrap: nowrap; */
-                justify-content: space-evenly;
+                justify-content: stretch;
                 flex-direction: row;
-                /*! margin-bottom: 0.5%; */
-                min-width: min-content;
-                min-height: min-content;
-                width: 90vh;
-                /*! height: 2rem; */
-                max-width: 100%;
-                /*! max-height: 2.5rem; */
-                scale: 0.75;
+                min-width: 50vmin;
+                width: 75vmin;
+                margin: 0 auto;
+                margin-bottom: 10px;
+                align-items: stretch;
+                justify-content: safe;
+
             }
 
 
 
             button, select, input[type="file"] {
-                padding: 10px 20px;
+                padding:  2px 1% 2px 1%;
                 font-size: 1rem;
                 cursor: pointer;
                 border: none;
@@ -72,7 +99,7 @@ class SliderPuzzle extends HTMLElement {
                 background-color: #3498db;
                 color: white;
                 transition: background-color 0.2s, transform 0.1s;
-                outline: outset brown 5px;
+                outline: outset brown 0.5px;
             }
 
             button:hover, select:hover, input[type="file"]:hover {
@@ -126,9 +153,11 @@ class SliderPuzzle extends HTMLElement {
             #ogimg {
                 display: none;
                 max-width: 100%;
-                margin: 10px auto;
+                margin: 1% auto;
+                max-height: 90vmin;
                 border: 2px solid #2980b9;
                 border-radius: 5px;
+                box-shadow: 10px 4px 8px 10 rgba(10, 10, 10, 0.4);
             }
 
             #puzzleGrid {
@@ -136,17 +165,17 @@ class SliderPuzzle extends HTMLElement {
                 gap: 2px;
                 margin: 0 auto;
                 width: 100%;
-                max-width: 500px;
+                max-width: 90vmin;
                 border: 2px solid #2980b9;
                 border-radius: 10px;
-                overflow: hidden;
+                overflow: auto;
                 background-color: #ecf0f1;
             }
 
             .tile {
                 background-size: cover;
                 background-position: center;
-                cursor: pointer;
+                cursor: src("https://picsum.photos/600");
                 aspect-ratio: 1 / 1;
                 transition: transform 0.2s;
                 display: flex;
@@ -169,24 +198,78 @@ class SliderPuzzle extends HTMLElement {
             }
 
             /* Responsive Design */
-            @media (max-width: 600px) {
+            @media (max-width: 75vmin) {
                 #puzzleGrid {
-                    max-width: 90vw;
+                    max-width: 90vmin;
                 }
             }
-        
-        
-        
-        `;
+
+            span {
+                margin: 0 5px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                font-weight: bold;
+                flex-wrap: nowrap;
+                flex-direction: row;
+            }
+
+
+            slider-puzzle {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                max-width: 90vmin;
+                margin: 0 auto;
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            :root {
+                box-sizing: border-box;
+            }
+
+.first_shuffle {
+    display: flex;
+    position: absolute;
+    float: left;
+    clear: both;
+    top: 45vmin;
+    left: 4vmin;
+    width: fit-content;
+    height: fit-content;
+    transform: translate(-25vmin, -45vmin), scale(0.25);
+    transition: all 0.75s;
+    font-size: 4rem;
+    background-color: #2ecc71;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.first_shuffle:hover {
+    background-color: #27ae60;
+}
+.first_shuffle:active {
+    transform: scale(0.25);}
+
+    drag-grip {
+        opacity: 0;
+    }
+
+            `;
 
         const template = document.createElement('div');
+        template.id = 'bigkahuna';
         template.innerHTML = `
             <div id="ogimage" tabindex="0" aria-label="Toggle Original Image">Show Original Image</div>
             <img id="ogimg" alt="Original Image" />
             
             <div id="controls">
-                <button id="shuffleButton">Shuffle</button>
-                <button id="resetButton">Reset</button>
                 <input type="file" id="uploadButton" accept="image/*" aria-label="Upload Image">
                 <label for="puzzleSize" style="display: flex; align-items: center; gap: 5px;">
                     Size:
@@ -194,330 +277,345 @@ class SliderPuzzle extends HTMLElement {
                         <option value="3">3 x 3</option>
                         <option value="4" selected>4 x 4</option>
                         <option value="5">5 x 5</option>
+                        <option value="6">6 x 6</option>
+                        <option value="7">7 x 7</option>
+                        <option value="9">9 x 9</option>
+                        <option value="8">9 x 7</option>
                     </select>
                 </label>
             </div>
-            
+            <span>
+            <button class="first_shuffle" id="shuffleButton">Shuffle</button>
             <div id="timer">Elapsed Time: 00:00</div>
             <div id="moveCount">Moves Made: 0</div>
-            
+                <button id="resetButton">Reset</button>
+            </span>
             <div id="puzzleGrid" aria-label="Puzzle Grid"></div>
         `;
 
+        const grip = document.createElement('drag-grip');
+        grip.setAttribute('aria-label', 'Drag to Relocate Game Panel');
+        grip.id = 'puzzleDragGrip';
         this.shadowRoot.appendChild(style);
         this.shadowRoot.appendChild(template);
+        const dragScript = document.createElement('script');
+        dragScript.src = '../customelements/drag-grip.js';
+        this.shadowRoot.appendChild(dragScript);
 
+        this.shadowRoot.appendChild(grip);
         this.bindEvents();
     }
 
-    // The rest of your methods remain unchanged...
-    // [Include the rest of your methods here without modification]
-    
-            // Initialize tiles based on current size and image
-            initializeTiles() {
-                const totalTiles = this.puzzleState.size * this.puzzleState.size;
-                this.puzzleState.tiles = [];
-                this.puzzleState.tilePositions = [];
 
-                for (let i = 1; i < totalTiles; i++) {
-                    this.puzzleState.tiles.push(i);
-                    this.puzzleState.tilePositions.push(i);
-                }
-                this.puzzleState.tilePositions.push(0); // Empty tile
-            }
+    initializeTiles() {
+        const totalTiles = this.puzzleState.size * this.puzzleState.size;
+        this.puzzleState.tiles = [];
+        this.puzzleState.tilePositions = [];
 
-            // Update the grid layout based on puzzle size
-            updateGridStyle() {
-                const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
-                puzzleGrid.style.gridTemplateColumns = `repeat(${this.puzzleState.size}, 1fr)`;
-                puzzleGrid.style.gridTemplateRows = `repeat(${this.puzzleState.size}, 1fr)`;
-            }
+        for (let i = 1; i < totalTiles; i++) {
+            this.puzzleState.tiles.push(i);
+            this.puzzleState.tilePositions.push(i);
+        }
+        this.puzzleState.tilePositions.push(0); // Empty tile
 
-            // Render the puzzle grid based on current tile positions
-            initializePuzzle() {
-                const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
-                puzzleGrid.innerHTML = '';
-                this.updateGridStyle();
+        // Set initialState to remember the starting positions
+        this.puzzleState.initialState = [...this.puzzleState.tilePositions];
+    }
 
-                this.puzzleState.tilePositions.forEach((value, index) => {
-                    const tile = document.createElement('div');
-                    tile.classList.add('tile');
-                    tile.setAttribute('role', 'button');
-                    tile.setAttribute('aria-label', value === 0 ? 'Empty Tile' : `Tile ${value}`);
-                    tile.setAttribute('tabindex', value === 0 ? '-1' : '0');
 
-                    if (value === 0) {
-                        tile.classList.add('hidden');
-                    } else {
-                        const row = Math.floor((value - 1) / this.puzzleState.size);
-                        const col = (value - 1) % this.puzzleState.size;
-                        tile.style.backgroundImage = `url(${this.puzzleState.imageUrl})`;
-                        tile.style.backgroundSize = `${this.puzzleState.size * 100}% ${this.puzzleState.size * 100}%`;
-                        tile.style.backgroundPosition = `${(col * 100) / (this.puzzleState.size - 1)}% ${(row * 100) / (this.puzzleState.size - 1)}%`;
-                        tile.textContent = value; // Optional: Display tile number for debugging
-                        
-                        // Keyboard accessibility: Allow tile movement via Enter or Space
-                        tile.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                this.moveTile(index);
-                            }
-                        });
+    // Update the grid layout based on puzzle size
+    updateGridStyle() {
+        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
+        puzzleGrid.style.gridTemplateColumns = `repeat(${this.puzzleState.size}, 1fr)`;
+        puzzleGrid.style.gridTemplateRows = `repeat(${this.puzzleState.size}, 1fr)`;
+    }
+
+    // Render the puzzle grid based on current tile positions
+    initializePuzzle() {
+        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
+        puzzleGrid.innerHTML = '';
+        this.updateGridStyle();
+
+        this.puzzleState.tilePositions.forEach((value, index) => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.setAttribute('role', 'button');
+            tile.setAttribute('aria-label', value === 0 ? 'Empty Tile' : `Tile ${value}`);
+            tile.setAttribute('tabindex', value === 0 ? '-1' : '0');
+
+            if (value === 0) {
+                tile.classList.add('hidden');
+            } else {
+                const row = Math.floor((value - 1) / this.puzzleState.size);
+                const col = (value - 1) % this.puzzleState.size;
+                tile.style.backgroundImage = `url(${this.puzzleState.imageUrl})`;
+                tile.style.backgroundSize = `${this.puzzleState.size * 100}% ${this.puzzleState.size * 100}%`;
+                tile.style.backgroundPosition = `${(col * 100) / (this.puzzleState.size - 1)}% ${(row * 100) / (this.puzzleState.size - 1)}%`;
+                tile.textContent = value; // 
+                tile.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.moveTile(index);
                     }
-
-                    // Click event for tile movement
-                    tile.addEventListener('click', () => this.moveTile(index));
-                    puzzleGrid.appendChild(tile);
                 });
-
-                this.updateMoveCountDisplay();
             }
 
-            // Handle tile movement logic
-            moveTile(index) {
-                const emptyIndex = this.puzzleState.tilePositions.indexOf(0);
-                const size = this.puzzleState.size;
+            // Click event for tile movement
+            tile.addEventListener('click', () => this.moveTile(index));
+            puzzleGrid.appendChild(tile);
+        });
 
-                const rowEmpty = Math.floor(emptyIndex / size);
-                const colEmpty = emptyIndex % size;
-                const rowTile = Math.floor(index / size);
-                const colTile = index % size;
+        this.updateMoveCountDisplay();
+    }
 
-                const rowDiff = Math.abs(rowTile - rowEmpty);
-                const colDiff = Math.abs(colTile - colEmpty);
+    // Handle tile movement logic
+    moveTile(index) {
+        const emptyIndex = this.puzzleState.tilePositions.indexOf(0);
+        const size = this.puzzleState.size;
 
-                // Allow only adjacent moves (up, down, left, right)
-                if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
-                    [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
-                    this.puzzleState.moveCount++;
-                    this.initializePuzzle();
-                    this.updateMoveCountDisplay();
-                    this.checkWinCondition();
-                } else {
-                    // Optional: Provide feedback for invalid moves
-                    // For example, shake the tile or display a message
-                    console.log("Invalid move");
+        const rowEmpty = Math.floor(emptyIndex / size);
+        const colEmpty = emptyIndex % size;
+        const rowTile = Math.floor(index / size);
+        const colTile = index % size;
+
+        const rowDiff = Math.abs(rowTile - rowEmpty);
+        const colDiff = Math.abs(colTile - colEmpty);
+
+        // Allow only adjacent moves (up, down, left, right)
+        if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+            [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
+            this.puzzleState.moveCount++;
+            this.initializePuzzle();
+            this.updateMoveCountDisplay();
+            this.checkWinCondition();
+        } else {
+
+            console.log("Invalid move");
+        }
+    }
+    shufflePuzzle() {
+        if (this.shadowRoot.querySelector('#shuffleButton')) {
+            this.shadowRoot.querySelector('#shuffleButton').classList.remove('first_shuffle');
+        }
+        do {
+            for (let i = this.puzzleState.tilePositions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.puzzleState.tilePositions[i], this.puzzleState.tilePositions[j]] = [this.puzzleState.tilePositions[j], this.puzzleState.tilePositions[i]];
+            }
+        } while (!this.isSolvable());
+
+        this.initializePuzzle();
+        this.puzzleState.moveCount = 0;
+        this.calculateEstimatedMinimumMoves();
+        this.updateMoveCountDisplay();
+        this.resetTimer();
+    }
+
+
+    // Reset the puzzle to the initial state
+    resetPuzzle() {
+        this.puzzleState.tilePositions = [...this.puzzleState.initialState];
+        this.initializePuzzle();
+        this.puzzleState.moveCount = 0;
+        this.updateMoveCountDisplay();
+        this.resetTimer();
+    }
+
+    // Check if the current puzzle state is solvable
+    isSolvable() {
+        const inversionCount = this.getInversionCount(this.puzzleState.tilePositions);
+        const size = this.puzzleState.size;
+        if (size % 2 !== 0) {
+            return inversionCount % 2 === 0;
+        } else {
+            const emptyRow = Math.floor(this.puzzleState.tilePositions.indexOf(0) / size);
+            return (inversionCount + emptyRow) % 2 !== 0;
+        }
+    }
+
+    // Calculate the number of inversions in the puzzle
+    getInversionCount(arr) {
+        let invCount = 0;
+        const tiles = arr.filter(n => n !== 0);
+        for (let i = 0; i < tiles.length - 1; i++) {
+            for (let j = i + 1; j < tiles.length; j++) {
+                if (tiles[i] > tiles[j]) {
+                    invCount++;
                 }
             }
+        }
+        return invCount;
+    }
 
-            // Shuffle the puzzle ensuring it's solvable
-            shufflePuzzle() {
-                do {
-                    for (let i = this.puzzleState.tilePositions.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [this.puzzleState.tilePositions[i], this.puzzleState.tilePositions[j]] = [this.puzzleState.tilePositions[j], this.puzzleState.tilePositions[i]];
-                    }
-                } while (!this.isSolvable() || this.isSolved());
-
-                this.initializePuzzle();
-                this.puzzleState.moveCount = 0;
-                this.calculateEstimatedMinimumMoves();
-                this.updateMoveCountDisplay();
-                this.resetTimer();
+    // Check if the puzzle is solved
+    isSolved() {
+        for (let i = 0; i < this.puzzleState.tilePositions.length - 1; i++) {
+            if (this.puzzleState.tilePositions[i] !== i + 1) {
+                return false;
             }
+        }
+        return true;
+    }
 
-            // Reset the puzzle to the initial state
-            resetPuzzle() {
-                this.puzzleState.tilePositions = [...this.puzzleState.tiles];
-                this.initializePuzzle();
-                this.puzzleState.moveCount = 0;
-                this.updateMoveCountDisplay();
-                this.resetTimer();
+    // Check for win condition and handle accordingly
+    checkWinCondition() {
+        if (this.isSolved()) {
+            this.stopTimer();
+            const efficiencyStatus = this.getEfficiencyStatus();
+            let efficiencyMessage = '';
+            if (efficiencyStatus === 'optimal') {
+                efficiencyMessage = 'Excellent! You solved the puzzle optimally.';
+            } else if (efficiencyStatus === 'good') {
+                efficiencyMessage = 'Great job! You solved the puzzle efficiently.';
+            } else {
+                efficiencyMessage = 'Good effort! Try solving it in fewer moves next time.';
             }
+            alert(`🎉 Congratulations! You solved the puzzle in ${this.formatTime(Date.now() - this.puzzleState.timerStart)}!\n${efficiencyMessage}`);
 
-            // Check if the current puzzle state is solvable
-            isSolvable() {
-                const inversionCount = this.getInversionCount(this.puzzleState.tilePositions);
-                const size = this.puzzleState.size;
-                if (size % 2 !== 0) {
-                    return inversionCount % 2 === 0;
-                } else {
-                    const emptyRow = Math.floor(this.puzzleState.tilePositions.indexOf(0) / size);
-                    return (inversionCount + emptyRow) % 2 !== 0;
+            // Dispatch a custom event for puzzle completion
+            this.dispatchEvent(new CustomEvent('puzzle-completed', {
+                detail: {
+                    time: this.formatTime(Date.now() - this.puzzleState.timerStart),
+                    moves: this.puzzleState.moveCount,
+                    efficiency: efficiencyStatus
                 }
+            }));
+        }
+    }
+
+    // Start or reset the timer
+    resetTimer() {
+        this.stopTimer();
+        this.puzzleState.timerStart = Date.now();
+        this.puzzleState.timerRunning = true;
+        this.updateTimerDisplay(0);
+        this.puzzleState.timerInterval = setInterval(() => this.updateTimer(), 1000);
+    }
+
+    // Stop the timer
+    stopTimer() {
+        this.puzzleState.timerRunning = false;
+        if (this.puzzleState.timerInterval) {
+            clearInterval(this.puzzleState.timerInterval);
+            this.puzzleState.timerInterval = null;
+        }
+    }
+
+    // Update the timer display
+    updateTimer() {
+        if (this.puzzleState.timerRunning) {
+            const elapsed = Date.now() - this.puzzleState.timerStart;
+            this.updateTimerDisplay(elapsed);
+        }
+    }
+
+    // Format time from milliseconds to MM:SS
+    formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${minutes}:${seconds}`;
+    }
+
+    // Update the timer element's text
+    updateTimerDisplay(ms) {
+        const timerElement = this.shadowRoot.getElementById('timer');
+        timerElement.textContent = `Elapsed Time: ${this.formatTime(ms)}`;
+    }
+
+    // Calculate the estimated minimum number of moves using Manhattan Distance
+    calculateEstimatedMinimumMoves() {
+        let estimatedMoves = 0;
+        const size = this.puzzleState.size;
+
+        for (let i = 0; i < this.puzzleState.tilePositions.length; i++) {
+            const tileNumber = this.puzzleState.tilePositions[i];
+            if (tileNumber !== 0) {
+                const currentRow = Math.floor(i / size);
+                const currentCol = i % size;
+                const targetRow = Math.floor((tileNumber - 1) / size);
+                const targetCol = (tileNumber - 1) % size;
+                estimatedMoves += Math.abs(currentRow - targetRow) + Math.abs(currentCol - targetCol);
             }
+        }
 
-            // Calculate the number of inversions in the puzzle
-            getInversionCount(arr) {
-                let invCount = 0;
-                const tiles = arr.filter(n => n !== 0);
-                for (let i = 0; i < tiles.length - 1; i++) {
-                    for (let j = i + 1; j < tiles.length; j++) {
-                        if (tiles[i] > tiles[j]) {
-                            invCount++;
-                        }
-                    }
-                }
-                return invCount;
-            }
+        this.puzzleState.estimatedMinimumMoves = estimatedMoves;
+    }
 
-            // Check if the puzzle is solved
-            isSolved() {
-                for (let i = 0; i < this.puzzleState.tilePositions.length - 1; i++) {
-                    if (this.puzzleState.tilePositions[i] !== i + 1) {
-                        return false;
-                    }
-                }
-                return true;
-            }
+    // Update the move count display with efficiency feedback
+    updateMoveCountDisplay() {
+        const moveCountElement = this.shadowRoot.getElementById('moveCount');
+        moveCountElement.textContent = `Moves Made: ${this.puzzleState.moveCount}`;
 
-            // Check for win condition and handle accordingly
-            checkWinCondition() {
-                if (this.isSolved()) {
-                    this.stopTimer();
-                    const efficiencyStatus = this.getEfficiencyStatus();
-                    let efficiencyMessage = '';
-                    if (efficiencyStatus === 'optimal') {
-                        efficiencyMessage = 'Excellent! You solved the puzzle optimally.';
-                    } else if (efficiencyStatus === 'good') {
-                        efficiencyMessage = 'Great job! You solved the puzzle efficiently.';
-                    } else {
-                        efficiencyMessage = 'Good effort! Try solving it in fewer moves next time.';
-                    }
-                    alert(`🎉 Congratulations! You solved the puzzle in ${this.formatTime(Date.now() - this.puzzleState.timerStart)}!\n${efficiencyMessage}`);
-                    
-                    // Dispatch a custom event for puzzle completion
-                    this.dispatchEvent(new CustomEvent('puzzle-completed', {
-                        detail: {
-                            time: this.formatTime(Date.now() - this.puzzleState.timerStart),
-                            moves: this.puzzleState.moveCount,
-                            efficiency: efficiencyStatus
-                        }
-                    }));
-                }
-            }
+        // Remove existing efficiency classes
+        moveCountElement.classList.remove('optimal', 'good', 'needs-improvement');
 
-            // Start or reset the timer
-            resetTimer() {
-                this.stopTimer();
-                this.puzzleState.timerStart = Date.now();
-                this.puzzleState.timerRunning = true;
-                this.updateTimerDisplay(0);
-                this.puzzleState.timerInterval = setInterval(() => this.updateTimer(), 1000);
-            }
+        // Add the current efficiency class
+        const efficiencyStatus = this.getEfficiencyStatus();
+        moveCountElement.classList.add(efficiencyStatus);
+    }
 
-            // Stop the timer
-            stopTimer() {
-                this.puzzleState.timerRunning = false;
-                if (this.puzzleState.timerInterval) {
-                    clearInterval(this.puzzleState.timerInterval);
-                    this.puzzleState.timerInterval = null;
-                }
-            }
+    // Determine the efficiency status based on moves made vs estimated minimum
+    getEfficiencyStatus() {
+        const minMoves = this.puzzleState.estimatedMinimumMoves;
+        const movesMade = this.puzzleState.moveCount;
 
-            // Update the timer display
-            updateTimer() {
-                if (this.puzzleState.timerRunning) {
-                    const elapsed = Date.now() - this.puzzleState.timerStart;
-                    this.updateTimerDisplay(elapsed);
-                }
-            }
+        if (movesMade <= minMoves * 1.5) { // Adjust multiplier as needed
+            return 'optimal';
+        } else if (movesMade <= minMoves * 3) {
+            return 'good';
+        } else {
+            return 'needs-improvement';
+        }
+    }
 
-            // Format time from milliseconds to MM:SS
-            formatTime(ms) {
-                const totalSeconds = Math.floor(ms / 1000);
-                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-                const seconds = String(totalSeconds % 60).padStart(2, '0');
-                return `${minutes}:${seconds}`;
-            }
+    // Load the default image for the puzzle
+    loadDefaultImage() {
+        this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
+        this.initializeTiles();
+        this.initializePuzzle();
+        this.resetTimer();
+    }
 
-            // Update the timer element's text
-            updateTimerDisplay(ms) {
-                const timerElement = this.shadowRoot.getElementById('timer');
-                timerElement.textContent = `Elapsed Time: ${this.formatTime(ms)}`;
-            }
-
-            // Calculate the estimated minimum number of moves using Manhattan Distance
-            calculateEstimatedMinimumMoves() {
-                let estimatedMoves = 0;
-                const size = this.puzzleState.size;
-
-                for (let i = 0; i < this.puzzleState.tilePositions.length; i++) {
-                    const tileNumber = this.puzzleState.tilePositions[i];
-                    if (tileNumber !== 0) {
-                        const currentRow = Math.floor(i / size);
-                        const currentCol = i % size;
-                        const targetRow = Math.floor((tileNumber - 1) / size);
-                        const targetCol = (tileNumber - 1) % size;
-                        estimatedMoves += Math.abs(currentRow - targetRow) + Math.abs(currentCol - targetCol);
-                    }
-                }
-
-                this.puzzleState.estimatedMinimumMoves = estimatedMoves;
-            }
-
-            // Update the move count display with efficiency feedback
-            updateMoveCountDisplay() {
-                const moveCountElement = this.shadowRoot.getElementById('moveCount');
-                moveCountElement.textContent = `Moves Made: ${this.puzzleState.moveCount}`;
-
-                // Remove existing efficiency classes
-                moveCountElement.classList.remove('optimal', 'good', 'needs-improvement');
-
-                // Add the current efficiency class
-                const efficiencyStatus = this.getEfficiencyStatus();
-                moveCountElement.classList.add(efficiencyStatus);
-            }
-
-            // Determine the efficiency status based on moves made vs estimated minimum
-            getEfficiencyStatus() {
-                const minMoves = this.puzzleState.estimatedMinimumMoves;
-                const movesMade = this.puzzleState.moveCount;
-
-                if (movesMade <= minMoves * 1.5) { // Adjust multiplier as needed
-                    return 'optimal';
-                } else if (movesMade <= minMoves * 3) {
-                    return 'good';
-                } else {
-                    return 'needs-improvement';
-                }
-            }
-
-            // Load the default image for the puzzle
-            loadDefaultImage() {
+    // Handle image upload by the user
+    handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.puzzleState.imageUrl = e.target.result;
                 this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
                 this.initializeTiles();
                 this.initializePuzzle();
                 this.resetTimer();
-            }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    // Split the image into tiles and initialize the puzzle 
+    changePuzzleSize() {
+        const selectedSize = this.shadowRoot.getElementById('puzzleSize').value;
+        const validSizes = ['3', '4', '5', '6', '7', '9', '8'];
 
-            // Handle image upload by the user
-            handleImageUpload(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.puzzleState.imageUrl = e.target.result;
-                        this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
-                        this.initializeTiles();
-                        this.initializePuzzle();
-                        this.resetTimer();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
+        if (validSizes.includes(selectedSize)) {
+            this.puzzleState.size = selectedSize.includes('x') ? parseInt(selectedSize.split('x')[0]) : parseInt(selectedSize);
+            this.initializeTiles();
+            this.initializePuzzle();
+            this.resetTimer();
+        }
+    }
 
-            // Change the puzzle size based on user selection
-            changePuzzleSize() {
-                const selectedSize = parseInt(this.shadowRoot.getElementById('puzzleSize').value);
-                if ([3, 4, 5].includes(selectedSize)) {
-                    this.puzzleState.size = selectedSize;
-                    this.initializeTiles();
-                    this.initializePuzzle();
-                    this.resetTimer();
-                }
-            }
 
-            // Toggle the display of the original image hint
-            toggleOriginalImage() {
-                const ogimg = this.shadowRoot.getElementById('ogimg');
-                const ogimage = this.shadowRoot.getElementById('ogimage');
-                const isActive = ogimage.classList.toggle('active');
-                ogimg.style.display = isActive ? 'block' : 'none';
-            }
+    // Toggle the display of the original image hint
+    toggleOriginalImage() {
+        const ogimg = this.shadowRoot.getElementById('ogimg');
+        const ogimage = this.shadowRoot.getElementById('ogimage');
+        const isActive = ogimage.classList.toggle('active');
+        ogimg.style.display = isActive ? 'block' : 'none';
+    }
 
-        // Define the custom element
-      
+    // Define the custom element
+
     // Bind event listeners to controls and interactive elements
     bindEvents() {
         const shadow = this.shadowRoot;
@@ -538,4 +636,4 @@ class SliderPuzzle extends HTMLElement {
     }
 }
 
-        customElements.define('slider-puzzle', SliderPuzzle);
+customElements.define('slider-puzzle', SliderPuzzle);
