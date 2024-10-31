@@ -1,7 +1,9 @@
 # Hey there! 👋
 
-**Y**ou have found your way to my collection of eclectic side-projects! <sup> <i>&lt;&gt;Sorry for your luck!</i></sup>  
-**T**his repo is where I experiment, test, and build things from stuff I don't know about <sub>(but intend to learn about in due time through screwing around with stuff and things)</sub>. As such, the content herein is not guaranteed to adhere to any preconceived notions of conformity and norms, but you can totally grab and use the code here too if you so desire. It’s all accessible with short and simple client-side HTML or JavaScript retrieval.
+####**Y**ou have found your way to my collection of eclectic side-projects 
+##### <sup> <i>Sorry for your luck!</i></sup> 
+
+**T**his repo is where I experiment, test, and build things from my imagination through trial and error . As such, the content herein is not guaranteed to adhere to any preconceived notions of conformity and norms, but you can totally grab and use the code here too if you so desire. It’s all accessible with short and simple client-side HTML or JavaScript retrieval.
 
 ## How to Get Started
 
