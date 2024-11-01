@@ -14,7 +14,22 @@ class SliderPuzzle extends HTMLElement {
             timerRunning: false,
             imageUrl: 'https://picsum.photos/600'
         };
-        this.render();
+        this.size = {
+            get() {
+                return this.puzzleState.size;
+            },
+            set(newSize) {
+                let short = newSize['l'] * newSize['w'];
+                if (short % 2 === 0) {
+                    newSize.l = newSize.w * 1.25;
+                }
+                if (newSize >= 2 && newSize <= 8) {
+                    this.puzzleState.size = newSize;
+                    this.resetPuzzle();
+                    this.render();
+                }
+            }
+        };        this.render();
     }
 
     connectedCallback() {
@@ -347,7 +362,7 @@ class SliderPuzzle extends HTMLElement {
         *{background-color: transparent; color: #f00f00ff; font-family: 'Arial', sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; box-sizing: border-box; }
         #bigkahuna {
                 background-color: transparent;
-
+                display: inline-flex;
 
             
         }
@@ -647,12 +662,23 @@ class SliderPuzzle extends HTMLElement {
 
         }
 
-        section, #controls, #puzzleInfo {
-          display: contents;
+        section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          align-content: center;
+          width: fit-content;
+          height: fit-content;
         }
+
         #controls {
           display: flex;
           flex-direction: row;
+        }
+
+        #puzzleInfo {
+            display: inline-flex;
         }
 
 
@@ -696,6 +722,8 @@ class SliderPuzzle extends HTMLElement {
             <img id="ogimg" aria-hidden="true" style="display: none;">
             <div id="puzzleGrid" aria-label="Puzzle Grid"></div>
         `;
+        template.style.minWidth = 'initial';
+        template.style.position = 'relative';
 
         const grip = document.createElement('drag-grip');
         grip.setAttribute('aria-label', 'Drag to Relocate Puzzle');
@@ -809,6 +837,11 @@ class SliderPuzzle extends HTMLElement {
         });
         const ctrls = this.shadowRoot.getElementById('controls');
         this.updateMoveCountDisplay();
+        const info = this.shadowRoot.getElementById('puzzleInfo');
+
+            const bk = info.parentElement;
+            const bks = bk.style;
+            bks.flexDirection = 'column';
     }
 
     // Handle tile movement logic
@@ -1063,7 +1096,12 @@ class SliderPuzzle extends HTMLElement {
     showInfo() {
 
         const info = this.shadowRoot.getElementById('puzzleInfo');
-        info.style.display = info.style.display === 'none' ? 'contents' : 'none';
+        info.style.display = info.style.display === 'none' ? 'inline-flex' : 'none';
+        if (info.style.display === 'inline-flex') {
+            const bk = info.parentElement;
+            const bks = bk.style;
+            bks.flexDirection = 'column';
+        }
     }
     // Define the custom element
 
@@ -1085,6 +1123,29 @@ class SliderPuzzle extends HTMLElement {
             }
         });
     }
+
+    addResizeListener() {
+        window.addEventListener('resize', () => {
+            this.resizePuzzle();
+        });
+        this.shadowRoot.getRootNode().addEventListener('resize', () => {
+            this.resizePuzzle();
+        });
+        const resizeLoop = setInterval(() => {
+            const hsc = this.shadowRoot.host.style;
+            if (hsc.height != hsc.width) {
+                this.resizePuzzle();
+            }
+        }, 1000);
+    }
+
+    // match the size of the puzzle with the size of the container
+    resizePuzzle () {
+        const puzzlediv = this.shadowRoot.getElementById('puzzleGrid');
+        const container = puzzlediv.parentElement;
+        puzzlediv.style.width = container.style.width + 'px';
+        puzzlediv.style.height = container.style.width + 'px';
+    }
+}
     
-        }
     customElements.define('slider-puzzle', SliderPuzzle);
