@@ -28,11 +28,37 @@
                         position: fixed;
                 }
 
+                #main-menu-buttons {
+                        display: inline-flex;
+                        height: 100%;
+                        justify-content: space-evenly;
+                        align-items: start;
+                        padding: 0px;
+                        flex-direction: column;
+                }
+
+                #main-menu-buttons>* {
+                        margin: auto;
+
+                }
+
                 floating-box {
                         min-width: min-content;
                         max-width: fit-content;
                         min-height: min-content;
                         max-height: min-content;
+                }
+
+                floating-box>* {
+                        display: inline-flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                        align-items: start;
+                        padding: 0px;
+                        background-color: #f5f5f5;
+                        border-bottom: 1px solid #ccc;
+                        margin: 0px;
+                        position: fixed;
                 }
         </style>
 </head>
@@ -41,20 +67,324 @@
 
         <header>
                 <menu id="main-menu">
-                        <div id="main-menu-title">
-                                <h1>Slider Puzzle</h1>
-                        </div>
                         <div id="main-menu-buttons">
                                 <button id="help-button">Help</button>
                                 <button id="about-button">About</button>
+
                         </div>
+                        <div id="main-menu-title">
+                                <h1>Slider Puzzle</h1>
+                        </div>
+                        <div>
+                            <button id="open-puzzle-dlg-btn" class="main-menu-button">
+                                Puzzle
+                            </button>
+                        </div>
+
                 </menu>
         </header>
+        <script>
+                // Get references to the buttons
+                const helpButton = document.getElementById('help-button');
+                const aboutButton = document.getElementById('about-button');
+                const openPuzzleDlgBtn = document.getElementById('open-puzzle-dlg-btn');
+                const openDiceDlgBtn = document.getElementById('open-dice-dlg-btn');
+                // Add event listeners to the buttons
+                openPuzzleDlgBtn.addEventListener('click', (event) => {
+                                                Array.from(document.body['popups']).forEach(p => {
+                                if (p.title === 'Puzzle') {
+                                        p.show();
+                                        return;
+                                }
+                        })
+                        const ce = document.createElement('slider-puzzle');
+                        const pu = new PopupBox('Puzzle', [ce]);
+                        document.body['popups'].push(pu);
+                        pu.show();
+
+                })
+                document.body['popups'] = [];
+                // Add event listeners to the buttons
+                helpButton.addEventListener('click', () => {
+                        Array.from(document.body['popups']).forEach(p => {
+                                if (p.title === 'Help') {
+                                        p.show();
+                                        return;
+                                }
+                        })
+                        const ce = document.createElement('div');
+                        ce.innerHTML = `
+                        <style>
+                            p {
+                                font-size: 0.9rem; 
+                        }
+
+                            b {
+                                color: #0000009f;
+                                background-color: #ffffffaa;
+                                font-size: 1.1rem;
+                            }
+
+                        </style>    
+                        
+                        
+                        <dl><dt><b>How to Play</b></dt>
+                            <dd>
+                            <p>
+                            <b>Objective:</b>
+                            <br>
+                            The puzzle consists of a grid of numbered tiles. The goal is to rearrange the tiles to correctly display the image.
+                            </p>
+                            <p>
+                            <b>Moving Tiles</b>
+                            <br>
+                            To move a tile it must be adjacent to the free space in the puzzle. The tile will slide into the empty space when you click or tap it.
+                            </p>
+                            <p>
+                            <b>Resetting the Puzzle</b>
+                            <br>
+                            If you get stuck or want to start over, you can reset the puzzle by clicking the "Reset" button.
+                            </p>
+                            <p>
+                            <b>Winning the Game</b>
+                            <br>
+                            The game is won when the puzzle is solved.
+                            </p>
+                            <p>
+                            <b>Tips</b>
+                            <br>
+                            - Try to solve the puzzle in the fewest moves possible.
+                            <br>
+                            - Use the "Reset" button to start over if you get stuck.
+                            <br>
+                            - Use the "Help" button to get tips and hints.
+                            </p>
+                            </dd>
+                            <dt><b>General</b></dt>
+                            <dd>
+                            <p>
+                            <b>Reference</b>
+                            <br>
+                            To view the image as it should look, click the "HINT" button.
+                            </p>
+                            <p>
+                            <b>Move and Resize</b>
+                            <br>
+                            To move the puzzle around, click and drag the puzzle.
+                            <br>
+                            To resize the puzzle, click and drag the bottom right corner.
+                            </p>
+                            <p>
+                            <b>Keyboard Shortcuts</b>
+                            <br>
+                            - Press "R" to reset the puzzle.
+                            <br>
+                            - Press "H" to show the hint.
+                            <br>
+                            - Use the arrow keys to move the empty space of the puzzle.
+                            <sup>As opposed to moving the pieces of the puzzle into the empty space.</sup>
+                            <br>
+                        </p>
+                        </dd>
+
+
+                            </dl>`;
+                        ce.style.color = '#44aa119f';
+                        ce.style.fontSize = '1.2em';
+                        ce.style.fontFamily = 'Arial';
+
+                        let pu = new PopupBox('HELP', [ce]);
+                        document.body['popups'].push(pu);
+                        pu.show();
+                        // Handle the "Help" button click event
+                });
+
+
+                aboutButton.addEventListener('click', () => {
+                        // Handle the "About" button click event
+                });
+
+                function createButton(label = 'BUTTON', onClick) {
+                        const button = document.createElement('button');
+                        button.textContent = label;
+                        button.addEventListener('click', onClick);
+                        return button;
+                }
+
+
+                function createNewPopup(_title, _contentElements) {
+                        const popup = new PopupBox(_title, _contentElements);
+                        popup.setAttribute('title', _title);
+                        let dlgBody = popup.dialog.querySelector('.dialog-content');
+                        let dlgFooter = popup.dialog.querySelector('.dialog-footer');
+                        document.body.appendChild(popup);
+                        return popup;
+                }
+
+
+                class PopupBox extends HTMLElement {
+                        constructor(_title = 'Popup', _contentElements = []) {
+                                super();
+                                this.attachShadow({ mode: 'open' });
+
+                                // Create styles
+                                const style = document.createElement('style');
+                                style.textContent = `
+                                  :host {
+                                      position: fixed;
+                                      top: 0;
+                                      left: 0;
+                                      width: 100%;
+                                      height: 100%;
+                                      background: rgba(0, 0, 0, 0.5);
+                                      display: flex;
+                                      justify-content: center;
+                                      align-items: center;
+                                      z-index: 1000;
+                                  }
+                                  .dialog {
+                                      background: white;
+                                      padding: 20px;
+                                      border-radius: 8px;
+                                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                                      max-width: 80%;
+                                      max-height: 80vh;
+                                      overflow: auto;
+                                      padding-top: 0px;
+                                  }
+                                  .dialog-header {
+                                      display: inline-flex;
+                                      justify-content: space-between;
+                                      align-items: center;
+                                      margin-bottom: 1%;
+                                      margin-right: -10px;
+                                      width: 100%;
+                                      font-size: 1.2rem;
+                                      background-color: #f5f5f5;
+                                      padding: 0px;
+                                      position: relative;
+                                      top: 0;
+                                      left: 0;
+                                      right: 0;
+                                  }
+                                  .dialog-content {
+                                      margin-bottom: 20px;
+                                  }
+                                  .dialog-inputs {
+                                      display: flex;
+                                      justify-content: flex-end;
+                                      gap: 10px;
+                                  }
+                                  button {
+                                      padding: 8px 16px;
+                                      border: none;
+                                      border-radius: 4px;
+                                      background: #007bff;
+                                      color: white;
+                                      cursor: pointer;
+                                  }
+                                  button:hover {
+                                      background: #0056b3;
+                                  }
+                                  .dialog-footer {
+                                      border-top: 1px solid #eee;
+
+                                  }
+
+                              `;
+
+                                // Create the dialog structure
+                                const dialog = document.createElement('div');
+                                dialog.classList.add('dialog');
+                                dialog.innerHTML = `
+                                  <div class="dialog-header">
+                                      <span id="dialog-title">${_title}
+                                      </span>
+                                      <span class="spacer"></span>
+                                      <button class="dialog-header-button close-button dlg-close-btn"id="dlg-X-btn">
+                                      ✕
+                                      </button>
+</div>
+                                  <div class="dialog-content" id="dialog-content">
+                                      ${Array.from(_contentElements).map(el => el.outerHTML).join('')}
+                                                                                                              <div class="dialog-inputs">
+
+                                  </div>
+                                  </div>
+                                  <div class="dialog-footer">
+                                      <slot name="footer">
+                                                                            <button  class="dlg-close-btn" id="close-help">Close</button>
+</slot>
+                                  </div>
+                              `;
+
+                                Array.from(dialog.querySelectorAll('.dlg-close-btn')).forEach(btn => {
+                                        btn.addEventListener('click', () => {
+                                                this.hide();
+                                        });
+                                });
+                                // Close on background click
+                                this.addEventListener('click', (e) => {
+                                        if (e.target != this && !this.contains(e.target)) {
+                                                this.hide();
+                                        }
+                                });
+
+                                // Close on escape key
+                                window.addEventListener('keydown', (e) => {
+                                        if (e.key === 'Escape' && this.isConnected) {
+                                                this.hide();
+                                        }
+                                });
+
+                                this.shadowRoot.appendChild(style);
+                                this.shadowRoot.appendChild(dialog);
+                                this.dialog = dialog;
+                        }
+
+                        show() {
+                                document.body.appendChild(this);
+                        }
+
+                        hide() {
+                                if (this.isConnected) {
+                                        document.body.removeChild(this);
+                                }
+                        }
+
+                        // Lifecycle callbacks
+                        connectedCallback() {
+                                document.body.style.overflow = 'hidden';
+                                this.setContent(this.args.content)
+                        }
+
+                        disconnectedCallback() {
+                                document.body.style.overflow = '';
+                        }
+
+                        // Method to update content
+                        setContent(content) {
+                                const contentDiv = this.shadowRoot.querySelector('#dialog-content');
+                                contentDiv.innerHTML = '';
+                                if (typeof content === 'string') {
+                                        contentDiv.innerHTML = content;
+                                } else if (content instanceof Element) {
+                                        contentDiv.appendChild(content);
+                                }
+                        }
+
+                        // Method to update title
+                        setTitle(title) {
+                                this.shadowRoot.querySelector('#dialog-title').textContent = title;
+                        }
+                }
+
+                customElements.define('popup-box', PopupBox);
+        </script>
 
 
         <!-- Define the custom element in HTML -->
         <floating-box>
-
                 <script>
                         class SliderPuzzle extends HTMLElement {
                                 constructor() {
@@ -69,7 +399,7 @@
                                                 timerStart: null,
                                                 timerInterval: null,
                                                 timerRunning: false,
-                                                imageUrl: './pics/output.jpg' //'https://picsum.photos/600'
+                                                imageUrl: 'https://picsum.photos/600'
                                         };
                                         this.size = {
                                                 get() {
@@ -768,6 +1098,7 @@
                 
                         #puzzleGrid{
                             resize: both;
+                            touch-action: manipulation;
                         }
                 
                 
@@ -1216,6 +1547,12 @@
                                 }
 
                                 addResizeListener() {
+                                        this.shadowRoot.host.addEventListener('touch', (event) => {
+                                                this.resizePuzzle(event);
+                                        });
+                                        this.shadowRoot.host.addEventListener('resize', (event) => {
+                                                this.resizePuzzle(event);
+                                        });
                                         this.shadowRoot.getElementById('puzzleGrid').addEventListener('change', (event) => {
                                                 this.resizePuzzle(event);
                                         });
@@ -1261,10 +1598,12 @@
                                         }
                                 };
                                 puzzleTileScale() {
-                                        let temp5 = document.getElementsByTagName('floating-box')[0].shadowRoot.firstElementChild.nextElementSibling.firstElementChild.shadowRoot.firstElementChild.nextElementSibling.querySelector('#puzzleGrid');
+                                        // let temp5 = document.getElementsByTagName('floating-box')[0].shadowRoot.firstElementChild.nextElementSibling.firstElementChild.shadowRoot.firstElementChild.nextElementSibling.querySelector('#puzzleGrid');
+                                        let temp5 = this.shadowRoot.getElementById('puzzleGrid');
+                                        // let temp5 = document.getElementsByTagName('floating-box')[0].shadowRoot.firstElementChild.nextElementSibling.firstElementChild.shadowRoot.firstElementChild.nextElementSibling.querySelector('#puzzleGrid');
                                         let _a = 'tile'
                                         let _c = Array.from(temp5.children).length;
-                                        Array.from(temp5.getElementsByClassName(_a)).forEach(_b => {
+                                        Array.from(temp5.children).forEach(_b => {
                                                 _b.style.minHeight = `${(parseInt(temp5.style.height) / Math.sqrt(_c) - (_c * 0.98))}px`;
                                                 _b.style.maxHeight = `${parseInt(_b.style.minHeight) + 1}px`;
                                                 temp5.style.minHeight = 'min-content';
@@ -1275,7 +1614,7 @@
                                 }
                                 puzzleInfoScale() {
                                         let _this = this.shadowRoot;
-                                        
+
                                         const pzi = _this.getElementById('puzzleInfo');
                                         const pzc = _this.getElementById('controls');
                                         const bk = _this.getElementById('bigkahuna');
@@ -1290,10 +1629,10 @@
                                         this.puzzleTileScale();
                                         this.puzzleInfoScale();
                                         this.shadowRoot.getElementById('puzzleGrid').style.width = this.shadowRoot.getElementById('bigkahuna').style.width + 'px';
-                                        this.shadowRoot.getElementById('puzzleGrid').style.height = this.shadowRoot.getElementById('bigkahuna').style.width + 'px';
+                                        this.shadowRoot.getElementById('puzzleGrid').style.height = this.shadowRoot.getElementById('bigkahuna').parentElement.style.width + 'px';
                                         console.log(new this.rsz(this, 'resize', event));
                                         const puzzlediv = this.shadowRoot.getElementById('puzzleGrid');
-                                        const container = puzzlediv.parentElement;
+                                        const container = puzzlediv.parentElement.parentElement.parentElement;
                                         puzzlediv.style.width = container.style.width + 'px';
                                         puzzlediv.style.height = container.style.width + 'px';
                                         if (this.shadowRoot.getElementById('puzzleGrid').style.width >= this.shadowRoot.getElementById('bigkahuna').style.width) {
@@ -1307,22 +1646,22 @@
 
                         customElements.define('slider-puzzle', SliderPuzzle);
                 </script>
-        </floating-box>
+                </floating-box>
 
-        <script>
+                <script>
 
 
 
-                // Define the custom floating box element
-                class FloatingBox extends HTMLElement {
-                        constructor() {
-                                super();
+                        // Define the custom floating box element
+                        class FloatingBox extends HTMLElement {
+                                constructor() {
+                                        super();
 
-                                // Create a shadow root for encapsulation
-                                this.attachShadow({ mode: 'open' });
+                                        // Create a shadow root for encapsulation
+                                        this.attachShadow({ mode: 'open' });
 
-                                // Attach HTML content and style to the shadow DOM
-                                this.shadowRoot.innerHTML = `
+                                        // Attach HTML content and style to the shadow DOM
+                                        this.shadowRoot.innerHTML = `
           <style>
             /* Basic styling for the floating box */
             :host {
@@ -1351,530 +1690,103 @@
               overflow: hidden;
               padding: 10px;
               box-sizing: border-box;
-
+              touch-action: pan-y;
             }
           </style>
-          <div class="content">
-              <slider-puzzle></slider-puzzle>
-          </div>
+          <div id="floating-content" class="content">
+<slider-puzzle></slider-puzzle>
+                    </div>
                 `;
 
-                                // Initialize variables for dragging
-                                this.isDragging = false;
-                                this.startX = 0;
-                                this.startY = 0;
-                        }
-
-                        connectedCallback() {
-                                this.addEventListener('mousedown', this.startDrag.bind(this));
-                                this.addEventListener('mouseup', this.endDrag.bind(this));
-                                this.addEventListener('mousemove', this.handleDrag.bind(this));
-                                window.addEventListener('resize', this.adjustScale.bind(this));
-                                this.adjustScale();  // Initial scale adjustment on load
-                        }
-
-                        disconnectedCallback() {
-                                this.removeEventListener('mousedown', this.startDrag.bind(this));
-                                this.removeEventListener('mouseup', this.endDrag.bind(this));
-                                this.removeEventListener('mousemove', this.handleDrag.bind(this));
-                                window.removeEventListener('resize', this.adjustScale.bind(this));
-                        }
-                        onResizeMouseUp() {
-                                this.resizing = false;
-                                this.removeEventListener('mouseup', this.onResizeMouseUp);
-                        }
-                        startDrag(event) {
-
-                                if (event.target !== this) return;
-                                if (this.resizing) {
-
-                                        return;
-                                };
-                                this.isDragging = true;
-                                this.startX = event.clientX - this.offsetLeft;
-                                this.startY = event.clientY - this.offsetTop;
-                                this.style.cursor = 'grabbing';
-                        }
-
-                        endDrag() {
-                                this.isDragging = false;
-                                this.style.cursor = 'grab';
-                                removeEventListener('mousemove', this.handleDrag.bind(this));
-
-                        }
-
-                        handleDrag(event) {
-                                if (!this.isDragging) return;
-
-                                // Calculate new position
-                                let newX = event.clientX - this.startX;
-                                let newY = event.clientY - this.startY;
-
-                                // Ensure the element stays within viewport bounds
-                                newX = Math.max(0, Math.min(newX, window.innerWidth - this.offsetWidth));
-                                newY = Math.max(0, Math.min(newY, window.innerHeight - this.offsetHeight));
-
-                                this.style.left = `${newX}px`;
-                                this.style.top = `${newY}px`;
-                        }
-
-                        adjustScale() {
-                                this.resizing = true;
-                                this.addEventListener('mouseup', this.onResizeMouseUp);
-                                const scaleFactor = Math.min(window.innerWidth / 600, window.innerHeight / 300, 1);
-                                this.style.transform = `scale(${scaleFactor})`;
-                                this.style.transform = `scale(${scaleFactor})`;
-                                function puzzleTileScale() {
-                                        let temp5 = document.getElementsByTagName('floating-box')[0].shadowRoot.firstElementChild.nextElementSibling.firstElementChild.shadowRoot.firstElementChild.nextElementSibling.querySelector('#puzzleGrid');
-                                        let _a = 'tile'
-                                        let _c = Array.from(temp5.children).length;
-                                        Array.from(temp5.getElementsByClassName(_a)).forEach(_b => {
-                                                _b.style.minHeight = `${(parseInt(temp5.style.height) / Math.sqrt(_c) - (_c * 0.98))}px`;
-                                                _b.style.maxHeight = `${parseInt(_b.style.minHeight) + 1}px`;
-                                                temp5.style.minHeight = 'min-content';
-                                                console.log(_b.style.minHeight)
-                                        });
+                                        // Initialize variables for dragging
+                                        this.isDragging = false;
+                                        this.startX = 0;
+                                        this.startY = 0;
+                                        this.floatingContent = this.shadowRoot.getElementById('floating-content');
                                 }
-                                puzzleTileScale();
+
+                                connectedCallback() {
+                                        this.addEventListener('mousedown', this.startDrag.bind(this));
+                                        this.addEventListener('mouseup', this.endDrag.bind(this));
+                                        this.addEventListener('mousemove', this.handleDrag.bind(this));
+
+                                        window.addEventListener('resize', this.adjustScale.bind(this));
+                                        this.adjustScale();  // Initial scale adjustment on load
+                                }
+
+                                disconnectedCallback() {
+                                        this.removeEventListener('mousedown', this.startDrag.bind(this));
+                                        this.removeEventListener('mouseup', this.endDrag.bind(this));
+                                        this.removeEventListener('mousemove', this.handleDrag.bind(this));
+                                        window.removeEventListener('resize', this.adjustScale.bind(this));
+                                }
+                                onResizeMouseUp() {
+                                        this.resizing = false;
+                                        this.removeEventListener('mouseup', this.onResizeMouseUp);
+                                }
+                                startDrag(event) {
+
+                                        if (event.target !== this) return;
+                                        if (this.resizing) {
+
+                                                return;
+                                        };
+                                        this.isDragging = true;
+                                        this.startX = event.clientX - this.offsetLeft;
+                                        this.startY = event.clientY - this.offsetTop;
+                                        this.style.cursor = 'grabbing';
+                                }
+
+                                endDrag() {
+                                        this.isDragging = false;
+                                        this.style.cursor = 'grab';
+                                        removeEventListener('mousemove', this.handleDrag.bind(this));
+
+                                }
+
+                                handleDrag(event) {
+                                        if (!this.isDragging) return;
+
+                                        // Calculate new position
+                                        let newX = event.clientX - this.startX;
+                                        let newY = event.clientY - this.startY;
+
+                                        // Ensure the element stays within viewport bounds
+                                        newX = Math.max(0, Math.min(newX, window.innerWidth - this.offsetWidth));
+                                        newY = Math.max(0, Math.min(newY, window.innerHeight - this.offsetHeight));
+
+                                        this.style.left = `${newX}px`;
+                                        this.style.top = `${newY}px`;
+                                }
+
+                                adjustScale() {
+                                        this.resizing = true;
+                                        this.addEventListener('mouseup', this.onResizeMouseUp);
+                                        const scaleFactor = Math.min(window.innerWidth / 600, window.innerHeight / 300, 1);
+                                        this.style.transform = `scale(${scaleFactor})`;
+                                        this.style.transform = `scale(${scaleFactor})`;
+                                        function puzzleTileScale() {
+                                                let temp5 = document.getElementsByTagName('floating-box')[0].shadowRoot.firstElementChild.nextElementSibling.firstElementChild.shadowRoot.firstElementChild.nextElementSibling.querySelector('#puzzleGrid');
+                                                let _a = 'tile'
+                                                let _c = Array.from(temp5.children).length;
+                                                Array.from(temp5.getElementsByClassName(_a)).forEach(_b => {
+                                                        _b.style.minHeight = `${(parseInt(temp5.style.height) / Math.sqrt(_c) - (_c * 0.98))}px`;
+                                                        _b.style.maxHeight = `${parseInt(_b.style.minHeight) + 1}px`;
+                                                        temp5.style.minHeight = 'min-content';
+                                                        console.log(_b.style.minHeight)
+                                                });
+                                        }
+                                        puzzleTileScale();
+                                }
                         }
-                }
 
-                // Define the new element
-                customElements.define('floating-box', FloatingBox);
-        </script>
+                        // Define the new element
+                        customElements.define('floating-box', FloatingBox);
+                </script>
+                <script>
+
+                </script>
 
 </body>
 
-</html><!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Image Slider Puzzle</title>
-</head>
-<body>
-    <slider-puzzle></slider-puzzle>
-
-    <script>
-class SliderPuzzle extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this.puzzleState = {
-            size: 4,
-            tiles: [],
-            timerStart: null,
-            timerRunning: false,
-            imageUrl: null,
-            tilePositions: [],
-            moveCount: 0,
-            estimatedMinimumMoves: 0,
-        };
-        this.render();
-    }
-
-    connectedCallback() {
-        this.loadDefaultImage();
-    }
-
-    render() {
-        const style = document.createElement('style');
-        style.textContent = `
-            /* Styles from your CSS */
-            :host {
-                display: block;
-                font-family: Arial, sans-serif;
-                background-color: #f0f0f0;
-                text-align: center;
-                width: min-content;
-                margin: 20px auto;
-            }
-
-            #puzzleGrid {
-                display: grid;
-                gap: 2px;
-                margin: 20px auto;
-                max-width: 600px;
-                border: 2px solid #2980b9;
-                border-radius: 10px;
-                overflow: hidden;
-                background-color: #fff;
-            }
-
-            .tile {
-                background-size: cover;
-                background-position: center;
-                cursor: pointer;
-                aspect-ratio: 1;
-                transition: transform 0.2s;
-            }
-
-            .tile:hover {
-                transform: scale(0.98);
-            }
-
-            .hidden {
-                visibility: hidden;
-            }
-
-            #controls {
-                text-align: center;
-                margin: 20px;
-            }
-
-            #timer {
-                margin: 10px;
-                font-size: 18px;
-            }
-
-            #moveCount.optimal {
-                color: green;
-            }
-
-            #moveCount.good {
-                color: orange;
-            }
-
-            #moveCount.needsImprovement {
-                color: red;
-            }
-
-            #shuffleButton, #resetButton, #uploadButton {
-                padding: 10px 20px;
-                font-size: 16px;
-                cursor: pointer;
-                border: none;
-                border-radius: 5px;
-                margin: 5px;
-                background-color: #3498db;
-                color: white;
-                transition: background-color 0.2s;
-            }
-
-            #shuffleButton:hover, #resetButton:hover, #uploadButton:hover {
-                background-color: #2980b9;
-            }
-
-            #sizeSelector {
-                margin: 10px;
-            }
-
-            #ogimage {
-                display: flex;
-                max-width: 100%;
-                max-height: 100%;
-                margin: 10px;
-                border: 2px solid #2980b9;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0 0 0 0.2);
-                transition: transform 0.2s;
-                cursor: pointer;
-                color: black;
-                position: relative;
-                top: 0;
-                left: 0;
-                z-index: 1000;
-                float: left;
-            }
-
-            #ogimg {
-                display: none;
-                max-width: 100%;
-                max-height: 100%;
-            }
-        `;
-
-        const template = document.createElement('template');
-        template.innerHTML = `
-            <div id="controls">
-               <div id="ogimage" title="Click to view original image">
-                HINT
-            </div>
-                <button id="shuffleButton">Shuffle</button>
-                <button id="resetButton">Reset</button>
-                <input type="file" id="uploadButton" accept="image/*">
-                <div id="sizeSelector">
-                    Puzzle Size: 
-                    <select id="puzzleSize">
-                        <option value="3">3 x 3</option>
-                        <option value="4" selected>4 x 4</option>
-                        <option value="5">5 x 5</option>
-                    </select>
-                </div>
-                            </div>            
-                <div id="timer">Elapsed Time: 00:00</div>
-                                <img id="ogimg" src="https://picsum.photos/600" alt="Original Image" />
-
-            <div id="puzzleGrid"></div>
-            <div id="moveCount">Moves Made: 0</div>
-
-        `;
-
-        this.shadowRoot.appendChild(style);
-        this.shadowRoot.appendChild(template.content.cloneNode(true));
-
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        const shadow = this.shadowRoot;
-        shadow.getElementById('shuffleButton').addEventListener('click', () => this.shufflePuzzle());
-        shadow.getElementById('resetButton').addEventListener('click', () => {
-            this.initializeTiles();
-            this.initializePuzzle();
-            this.resetTimer();
-        });
-        shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
-        shadow.getElementById('puzzleSize').addEventListener('change', () => this.changePuzzleSize());
-
-        shadow.getElementById('ogimage').addEventListener('click', () => {
-            const ogimg = shadow.getElementById('ogimg');
-            const ogimage = shadow.getElementById('ogimage');
-            ogimage.title = ogimage.title == 'Click to hide original image' ? 'Click to view original image' : 'Click to hide original image';
-            ogimage.style.backgroundColor = ogimage.style.backgroundColor === 'limegreen' ? 'darkgreen' : 'limegreen';
-            ogimg.style.display = ogimg.style.display === 'none' ? 'block' : 'none';
-        });
-    }
-
-    initializeTiles() {
-        const totalTiles = this.puzzleState.size * this.puzzleState.size;
-        this.puzzleState.tiles = [];
-        for (let i = 1; i < totalTiles; i++) {
-            this.puzzleState.tiles.push(i);
-        }
-        this.puzzleState.tiles.push(0); // Empty tile
-        this.puzzleState.tilePositions = [...this.puzzleState.tiles];
-    }
-
-    updateGridStyle() {
-        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
-        puzzleGrid.style.gridTemplateColumns = `repeat(${this.puzzleState.size}, 1fr)`;
-        puzzleGrid.style.gridTemplateRows = `repeat(${this.puzzleState.size}, 1fr)`;
-    }
-
-    initializePuzzle() {
-        const puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
-        puzzleGrid.innerHTML = '';
-        this.updateGridStyle();
-
-        this.puzzleState.tilePositions.forEach((value, index) => {
-            const tile = document.createElement('div');
-            tile.classList.add('tile');
-
-            if (value === 0) {
-                tile.classList.add('hidden');
-            } else {
-                const row = Math.floor((value - 1) / this.puzzleState.size);
-                const col = (value - 1) % this.puzzleState.size;
-                tile.style.backgroundImage = `url(${this.puzzleState.imageUrl})`;
-                tile.style.backgroundSize = `${this.puzzleState.size * 100}% ${this.puzzleState.size * 100}%`;
-                tile.style.backgroundPosition = `${(col * -100) / (this.puzzleState.size - 1)}% ${(row * -100) / (this.puzzleState.size - 1)}%`;
-            }
-
-            tile.addEventListener('click', () => this.moveTile(index));
-            puzzleGrid.appendChild(tile);
-        });
-
-        this.updateMoveCountDisplay();
-    }
-
-    moveTile(index) {
-        const emptyIndex = this.puzzleState.tilePositions.indexOf(0);
-        const size = this.puzzleState.size;
-
-        const rowEmpty = Math.floor(emptyIndex / size);
-        const colEmpty = emptyIndex % size;
-        const rowTile = Math.floor(index / size);
-        const colTile = index % size;
-
-        const rowDiff = rowTile - rowEmpty;
-        const colDiff = colTile - colEmpty;
-
-        // Standard adjacent move
-        if (Math.abs(rowDiff) + Math.abs(colDiff) === 1) {
-            [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
-            this.puzzleState.moveCount++;
-            this.initializePuzzle();
-            this.updateMoveCountDisplay();
-            this.checkWinCondition();
-        } 
-        // Special wrap-around moves
-        else if (
-            (colEmpty === size - 1 && rowEmpty < size - 1 && colTile === 0 && rowTile === rowEmpty + 1) ||
-            (colEmpty === 0 && rowEmpty > 0 && colTile === size - 1 && rowTile === rowEmpty - 1)
-        ) {
-            [this.puzzleState.tilePositions[index], this.puzzleState.tilePositions[emptyIndex]] = [this.puzzleState.tilePositions[emptyIndex], this.puzzleState.tilePositions[index]];
-            this.puzzleState.moveCount++;
-            this.initializePuzzle();
-            this.updateMoveCountDisplay();
-            this.checkWinCondition();
-        } else {
-            console.log("Invalid move");
-        }
-    }
-
-    shufflePuzzle() {
-        do {
-            for (let i = this.puzzleState.tilePositions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.puzzleState.tilePositions[i], this.puzzleState.tilePositions[j]] = [this.puzzleState.tilePositions[j], this.puzzleState.tilePositions[i]];
-            }
-        } while (!this.isSolvable());
-        this.initializePuzzle();
-        this.puzzleState.moveCount = 0;
-        this.calculateEstimatedMinimumMoves();
-        this.updateMoveCountDisplay();
-        this.resetTimer();
-    }
-
-    isSolvable() {
-        const inversionCount = this.getInversionCount(this.puzzleState.tilePositions);
-        const size = this.puzzleState.size;
-        if (size % 2 !== 0) {
-            return inversionCount % 2 === 0;
-        } else {
-            const emptyRow = size - Math.floor(this.puzzleState.tilePositions.indexOf(0) / size);
-            if (emptyRow % 2 === 0) {
-                return inversionCount % 2 !== 0;
-            } else {
-                return inversionCount % 2 === 0;
-            }
-        }
-    }
-
-    getInversionCount(arr) {
-        let invCount = 0;
-        const tiles = arr.filter(n => n !== 0);
-        for (let i = 0; i < tiles.length - 1; i++) {
-            for (let j = i + 1; j < tiles.length; j++) {
-                if (tiles[i] > tiles[j]) {
-                    invCount++;
-                }
-            }
-        }
-        return invCount;
-    }
-
-    checkWinCondition() {
-        for (let i = 0; i < this.puzzleState.tilePositions.length - 1; i++) {
-            if (this.puzzleState.tilePositions[i] !== i + 1) {
-                return;
-            }
-        }
-        this.puzzleState.timerRunning = false;
-        setTimeout(() => {
-            const efficiencyStatus = this.getEfficiencyStatus();
-            let efficiencyMessage = '';
-            if (efficiencyStatus === 'optimal') {
-                efficiencyMessage = 'Excellent! You solved the puzzle optimally.';
-            } else if (efficiencyStatus === 'good') {
-                efficiencyMessage = 'Great job! You solved the puzzle efficiently.';
-            } else {
-                efficiencyMessage = 'Good effort! Try solving it in fewer moves next time.';
-            }
-            alert(`Congratulations! You solved the puzzle in ${this.formatTime(Date.now() - this.puzzleState.timerStart)}!\n${efficiencyMessage}`);
-            this.resetTimer();
-        }, 100);
-    }
-
-    resetTimer() {
-        this.puzzleState.timerStart = Date.now();
-        this.puzzleState.timerRunning = true;
-        this.shadowRoot.getElementById('timer').textContent = `Elapsed Time: 00:00`;
-        this.updateTimer();
-    }
-
-    updateTimer() {
-        if (this.puzzleState.timerRunning) {
-            const elapsed = Date.now() - this.puzzleState.timerStart;
-            this.shadowRoot.getElementById('timer').textContent = `Elapsed Time: ${this.formatTime(elapsed)}`;
-            requestAnimationFrame(() => this.updateTimer());
-        }
-    }
-
-    formatTime(ms) {
-        const totalSeconds = Math.floor(ms / 1000);
-        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-        const seconds = String(totalSeconds % 60).padStart(2, '0');
-        return `${minutes}:${seconds}`;
-    }
-
-    calculateEstimatedMinimumMoves() {
-        let estimatedMoves = 0;
-        const size = this.puzzleState.size;
-
-        for (let i = 0; i < this.puzzleState.tilePositions.length; i++) {
-            const tileNumber = this.puzzleState.tilePositions[i];
-            if (tileNumber !== 0) {
-                const currentRow = Math.floor(i / size);
-                const currentCol = i % size;
-                const targetRow = Math.floor((tileNumber - 1) / size);
-                const targetCol = (tileNumber - 1) % size;
-                estimatedMoves += Math.abs(currentRow - targetRow) + Math.abs(currentCol - targetCol);
-            }
-        }
-
-        this.puzzleState.estimatedMinimumMoves = estimatedMoves;
-    }
-
-    updateMoveCountDisplay() {
-        const moveCountElement = this.shadowRoot.getElementById('moveCount');
-        moveCountElement.textContent = `Moves Made: ${this.puzzleState.moveCount}`;
-
-        // Remove existing efficiency classes
-        moveCountElement.classList.remove('optimal', 'good', 'needsImprovement');
-
-        // Add the current efficiency class
-        const efficiencyStatus = this.getEfficiencyStatus();
-        moveCountElement.classList.add(efficiencyStatus);
-    }
-
-    getEfficiencyStatus() {
-        const minMoves = this.puzzleState.estimatedMinimumMoves;
-        const movesMade = this.puzzleState.moveCount;
-
-        if (movesMade <= minMoves * 2) {
-            return 'optimal';
-        } else if (movesMade <= minMoves * 4) {
-            return 'good';
-        } else {
-            return 'needsImprovement';
-        }
-    }
-
-    loadDefaultImage() {
-        this.puzzleState.imageUrl = 'https://picsum.photos/600';
-        this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
-        this.initializeTiles();
-        this.initializePuzzle();
-        this.resetTimer();
-    }
-
-    handleImageUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.puzzleState.imageUrl = e.target.result;
-                this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
-                this.initializeTiles();
-                this.initializePuzzle();
-                this.resetTimer();
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    changePuzzleSize() {
-        this.puzzleState.size = parseInt(this.shadowRoot.getElementById('puzzleSize').value);
-        this.initializeTiles();
-        this.initializePuzzle();
-        this.resetTimer();
-    }
-}
-
-customElements.define('slider-puzzle', SliderPuzzle);
-
-    </script>
-</body>
 </html>
--->
