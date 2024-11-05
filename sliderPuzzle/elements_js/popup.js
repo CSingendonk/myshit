@@ -140,7 +140,10 @@ class PopupBox extends HTMLElement {
     constructor(_title = 'Popup', _contentElements = []) {
         super();
         this.attachShadow({ mode: 'open' });
-
+        this.args = {
+            title: _title,
+            content: [...Array.from(_contentElements)]
+        };
         // Create styles
         const style = document.createElement('style');
         style.textContent = `
@@ -272,7 +275,8 @@ class PopupBox extends HTMLElement {
     }
 
     disconnectedCallback() {
-        document.body.style.overflow = '';
+        document.body.style.overflow = 'auto';
+
     }
 
     // Method to update content
@@ -284,7 +288,9 @@ class PopupBox extends HTMLElement {
         } else if (content instanceof Element) {
             contentDiv.appendChild(content);
         }
-    }
+        else {
+            contentDiv.innerHTML = content.map(el => el.outerHTML).join('');
+        }
 
     // Method to update title
     setTitle(title) {

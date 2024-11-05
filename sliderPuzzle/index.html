@@ -23,10 +23,26 @@
             <button id="about-button">About</button>
         </span>
     </header>
-    <script src="./elements_js/popup.js"></script>
-    <script src="./elements_js/sliderPuzzle.js"></script>
-<main id="main-content"></main>    
+    <main id="main-content"></main>    
+    <script src="./js/loadExternalScripts.js"></script>
+    <script>
+// Usage example
+const importer = new Import();
+const test = document.createElement('div');
+test.id = 'tstdiv';
+document.getElementById('main-content').appendChild(test);
+const targetElement = document.querySelector('#tstdiv'); // Replace with your target element selector
 
+importer.load(['./elements_js/sliderPuzzle.js', './elements_js/popup.js'], targetElement)
+    .then(() => {
+        console.log('All scripts loaded successfully.');
+    })
+    .catch((error) => {
+        console.error('Error loading scripts:', error);
+    });
+
+
+    </script>
 </body>
 
 </html>
