@@ -11,7 +11,8 @@ class SliderPuzzle extends HTMLElement {
             timerStart: null,
             timerInterval: null,
             timerRunning: false,
-            imageUrl: './pics/tbird.png'  //'https://picsum.photos/600'
+            imageUrl: './pics/activegridanimation.gif'//./pics/tbird.png' 
+             //'https://picsum.photos/600'
         };
         this.size = {
             get() {
@@ -768,11 +769,7 @@ class SliderPuzzle extends HTMLElement {
         this.shadowRoot.appendChild(style);
 
         this.shadowRoot.appendChild(template);
-        const dragScript = document.createElement('script');
-        dragScript.src = '../customelements/drag-grip.js';
-        this.shadowRoot.appendChild(dragScript);
-        grip.style.border = '1px solid green';
-        template.appendChild(grip);
+
 
         this.bindEvents();
         // Local storage functions for game data
