@@ -1,0 +1,35 @@
+header {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: top;
+    flex-direction: row;
+    width: 100%;
+    height: min-content;
+    max-height: fit-content;
+    background-color: #00900077;   
+}
+h2, h1, h3 {
+    font-size: 1rem;
+    margin-left: 2%;
+    margin-top: 1%;;
+    margin-bottom: 1%;
+    padding: 0px;
+    color: #000000;
+    width: fit-content;
+    height: fit-content;
+    word-wrap: normal;
+    white-space: nowrap;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#about-dialog {
+    display: none;
+}
+
+#win-dialog {
+    display: none;
+}
+
+.open-dlg {
+    display: block;
+}
