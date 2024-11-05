@@ -769,8 +769,6 @@ class SliderPuzzle extends HTMLElement {
         this.shadowRoot.appendChild(style);
 
         this.shadowRoot.appendChild(template);
-
-
         this.bindEvents();
         // Local storage functions for game data
         this.saveGameData = () => {

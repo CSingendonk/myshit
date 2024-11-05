@@ -276,6 +276,7 @@ class PopupBox extends HTMLElement {
 
     disconnectedCallback() {
         document.body.style.overflow = 'auto';
+
     }
 
     // Method to update content
@@ -290,7 +291,6 @@ class PopupBox extends HTMLElement {
         else {
             contentDiv.innerHTML = content.map(el => el.outerHTML).join('');
         }
-    }
 
     // Method to update title
     setTitle(title) {
