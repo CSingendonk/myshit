@@ -1,9 +1,11 @@
 class Import {
-    constructor(src = 'file:///C:/Users/CPS13/Desktop/S123OD/OneDrive/Documents/fuckintpg/authclass/backpacks/myApp/public/page/v2/limbo/sliderPuzzle/elements_js/dummyUri.js') {
-        this.sources = Array.isArray(src) ? [...src].map(str => {
-            return {...src, src: str} }) : src;
-
-        
+    constructor(src = '') {        
+        this.src = src;
+        this.loaded = false;
+        this.loadedScripts = [];
+        this.paths = [];
+        this.queuedScripts = [];
+        this.failedScripts = [];
         /**
          * Load scripts
          * @param {string|string[]} sourceUrl - URL or array of URLs to load
@@ -32,7 +34,7 @@ class Import {
                 script.src = url;
                 script.onload = () => scriptResolve();
                 script.onerror = (error) => scriptReject(new Error(`Failed to load script: ${url}`));
-                shadow.appendChild(script);
+                document.body.appendChild(script);
             });
         };
 
@@ -45,3 +47,25 @@ class Import {
         }
     };
 }
+
+document.loadExternalScripts = () => {    // Usage example
+        const paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderPuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
+            const importer = new Import();
+            const nest = document.createElement('div');
+            nest.id = 'scripts-div';
+            document.body.appendChild(nest);
+            const targetElement = document.querySelector('#scripts-div'); // Replace with your target element selector
+            if (paths.length > 0) {
+                importer.load(paths, targetElement)
+                    .then(() => {
+                        console.log('All scripts loaded successfully.');
+                    })
+                    .catch((error) => {
+                        console.error('Error loading scripts:', error);
+                    });
+            }
+            else {
+                console.log('No paths provided.');
+            }
+
+        }
