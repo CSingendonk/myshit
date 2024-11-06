@@ -2,6 +2,7 @@ class SliderPuzzle extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+
         this.puzzleState = {
             size: 3, // Default puzzle size (4x4)
             tiles: [],
@@ -11,7 +12,7 @@ class SliderPuzzle extends HTMLElement {
             timerStart: null,
             timerInterval: null,
             timerRunning: false,
-            imageUrl: './pics/activegridanimation.gif'//./pics/tbird.png' 
+            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif' //'./pics/activegridanimation.gif'//./pics/tbird.png' 
              //'https://picsum.photos/600'
         };
         this.size = {
@@ -30,6 +31,11 @@ class SliderPuzzle extends HTMLElement {
                 }
             }
         }; this.render();
+                this.elements = {
+                    
+                    ...this.shadowRoot.querySelectorAll('*') 
+                    
+        };
     }
 
     connectedCallback() {
@@ -769,6 +775,8 @@ class SliderPuzzle extends HTMLElement {
         this.shadowRoot.appendChild(style);
 
         this.shadowRoot.appendChild(template);
+        this.initializePuzzle();
+        this.initializeTiles();
         this.bindEvents();
         // Local storage functions for game data
         this.saveGameData = () => {
