@@ -49,7 +49,7 @@ class Import {
 }
 
 document.loadExternalScripts = () => {    // Usage example
-        const paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderPuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
+        const paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
             const importer = new Import();
             const nest = document.createElement('div');
             nest.id = 'scripts-div';
