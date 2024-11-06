@@ -93,10 +93,16 @@ helpButton.addEventListener('click', () => {
                             <br>
                             - Press "R" to reset the puzzle.
                             <br>
-                            - Press "H" to show the hint.
+                            - Press "H" to show the puzzle image when solved.
                             <br>
+                            - Press "S" to randomly shuffle the puzzle tiles.
+                            <br>
+                            - Press "N" to start a new puzzle with a random image.
+                            <br>
+                            
                             - Use the arrow keys to move the empty space of the puzzle.
-                            <sup>As opposed to moving the pieces of the puzzle into the empty space.</sup>
+                            <br>
+                            - Use the file upload button to upload a your own image to use as the puzzle.
                             <br>
                         </p>
                         </dd>
@@ -164,6 +170,9 @@ class PopupBox extends HTMLElement {
                 justify-content: center;
                 align-items: center;
                 z-index: 1000;
+                resize: both;
+                @touch-action: none;
+                
             }
             .dialog {
                 background: white;
