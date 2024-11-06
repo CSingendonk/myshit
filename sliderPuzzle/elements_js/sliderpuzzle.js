@@ -12,7 +12,7 @@ class SliderPuzzle extends HTMLElement {
             timerStart: null,
             timerInterval: null,
             timerRunning: false,
-            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif' //'./pics/activegridanimation.gif'//./pics/tbird.png' 
+            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif' //'            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/activegridanimation.gif'//            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/tbird.png' 
              //'https://picsum.photos/600'
         };
         this.size = {
@@ -36,6 +36,8 @@ class SliderPuzzle extends HTMLElement {
                     ...this.shadowRoot.querySelectorAll('*') 
                     
         };
+                window.addEventListener('keydown', (event) => this.handleArrowKeyInput(event));
+
     }
 
     connectedCallback() {
@@ -1160,11 +1162,7 @@ class SliderPuzzle extends HTMLElement {
         shadow.getElementById('uploadButton').addEventListener('change', (e) => this.handleImageUpload(e));
         shadow.getElementById('puzzleSize').addEventListener('change', () => this.changePuzzleSize());
         shadow.getElementById('ogimage').addEventListener('click', () => this.toggleOriginalImage());
-        shadow.getElementById('newRandomImg').addEventListener('click', () => {
-            this.puzzleState.imageUrl = 'https://picsum.photos/600';
-            this.loadDefaultImage();
-        });
-
+        shadow.getElementById('newRandomImg').addEventListener('click', () => {this.loadRandomImage();});
         // Accessibility: Allow toggling original image via keyboard
         shadow.getElementById('ogimage').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key == 'Backspace' || e.key == 'Esc') {
@@ -1172,6 +1170,16 @@ class SliderPuzzle extends HTMLElement {
                 this.toggleOriginalImage();
             }
         });
+    }
+
+    loadRandomImage() {
+                this.puzzleState.imageUrl = 'https://picsum.photos/600/600/?random=' + Math.random();
+                this.shadowRoot.querySelector('#ogimg').src = this.puzzleState.imageUrl;
+                this.puzzleState.size = 3;
+                this.initializeTiles();
+                this.initializePuzzle();
+                this.shadowRoot.querySelector('#resetButton').click();
+                return this.puzzleState.imageUrl;
     }
 
     addResizeListener() {
@@ -1272,6 +1280,77 @@ class SliderPuzzle extends HTMLElement {
         }
         if (this.shadowRoot.getElementById('puzzleGrid').style.height >= this.shadowRoot.getElementById('bigkahuna').style.width) {
             this.shadowRoot.getElementById('puzzleGrid').style.height = `${parseFloat(this.shadowRoot.getElementById('bigkahuna').style.width) * Number.EPSILON}px`;
+        }
+    }
+        handleArrowKeyInput(event) {
+        const emptyIndex = this.puzzleState.tilePositions.indexOf(0);
+        const size = this.puzzleState.size;
+
+        // Calculate the row and column of the empty tile
+        const rowEmpty = Math.floor(emptyIndex / size);
+        const colEmpty = emptyIndex % size;
+
+        let targetIndex = -1;
+
+        switch (event.key) {
+            case 'ArrowDown':
+                // Move tile below the empty space up
+                if (rowEmpty < size - 1) {
+                    targetIndex = emptyIndex + size;
+                }
+                break;
+            case 'ArrowUp':
+                // Move tile above the empty space down
+                if (rowEmpty > 0) {
+                    targetIndex = emptyIndex - size;
+                }
+                break;
+            case 'ArrowRight':
+                // Move tile to the right of the empty space left
+                if (colEmpty < size - 1) {
+                    targetIndex = emptyIndex + 1;
+                }
+                break;
+            case 'ArrowLeft':
+                // Move tile to the left of the empty space right
+                if (colEmpty > 0) {
+                    targetIndex = emptyIndex - 1;
+                }
+                break;
+            case 'r':
+                // Reset the puzzle
+                this.resetPuzzle();
+                break;
+            case 's':
+                // Shuffle the puzzle
+                this.shufflePuzzle();
+                break;
+            case 'n':
+                this.puzzleState.imageUrl = 'https://picsum.photos/600/600/?random=' + Math.random();
+                this.shadowRoot.querySelector('#ogimg').src = this.puzzleState.imageUrl;
+                this.puzzleState.size = 3;
+                this.initializeTiles();
+                this.initializePuzzle();
+                break;
+            case 'h':
+                this.toggleOriginalImage();
+                break;
+            case 'p':
+                if (!document.body.querySelector('popup-box') || document.body.querySelector('popup-box')?.args?.title != 'Puzzle'){
+                    document.body.querySelector('#open-puzzle-dlg-btn').click();
+                }
+                else {
+                    document.body.querySelector('popup-box').hide();
+                };
+                break;
+            default:
+                
+                return;
+        }
+
+        // If a valid targetIndex was determined, call moveTile
+        if (targetIndex !== -1) {
+            this.moveTile(targetIndex);
         }
     }
 }
