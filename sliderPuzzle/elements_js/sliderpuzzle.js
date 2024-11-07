@@ -4,7 +4,7 @@ class SliderPuzzle extends HTMLElement {
         this.attachShadow({ mode: 'open' });
 
         this.puzzleState = {
-            size: 3, // Default puzzle size (4x4)
+            size: 3, // Default puzzle size (3x3)
             tiles: [],
             tilePositions: [],
             moveCount: 0,
@@ -12,9 +12,20 @@ class SliderPuzzle extends HTMLElement {
             timerStart: null,
             timerInterval: null,
             timerRunning: false,
-            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif' //'            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/activegridanimation.gif'//            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/tbird.png' 
-             //'https://picsum.photos/600'
-        };
+            imageUrl: 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif'
+        }
+        let rndmimg = () => { return `https://picsum.photos/600/600/?random=${Math.random()}`;};
+        this.defaultImages = {
+                gif: ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/activegridanimation.gif',
+                'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif'
+                ],
+                png: ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/tbird.png',
+                'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/runningb.png'],
+                random: [
+                    `https://picsum.photos/600/600/?random=${Math.random()}`, rndmimg()
+                ]
+            }
+        this.userImages = [];
         this.size = {
             get() {
                 return this.puzzleState.size;
@@ -30,17 +41,18 @@ class SliderPuzzle extends HTMLElement {
                     this.render();
                 }
             }
-        }; this.render();
-                this.elements = {
-                    
-                    ...this.shadowRoot.querySelectorAll('*') 
-                    
+        }; 
+        this.render();
+        this.elements = {
+            ...this.shadowRoot.querySelectorAll('*')
         };
+        this.isNewPuzzle = true;
                 window.addEventListener('keydown', (event) => this.handleArrowKeyInput(event));
 
     }
 
     connectedCallback() {
+        this.displayStartUI();
         this.loadDefaultImage();
         this.addResizeListener();
     }
@@ -1110,6 +1122,7 @@ class SliderPuzzle extends HTMLElement {
             reader.onload = (e) => {
                 this.puzzleState.imageUrl = e.target.result;
                 this.shadowRoot.getElementById('ogimg').src = this.puzzleState.imageUrl;
+                this.userImages.push(this.puzzleState.imageUrl);
                 this.initializeTiles();
                 this.initializePuzzle();
                 this.resetTimer();
@@ -1353,6 +1366,146 @@ class SliderPuzzle extends HTMLElement {
             this.moveTile(targetIndex);
         }
     }
-}
 
+    loadStartUIImages(imgcontainer){ 
+        if (imgcontainer.children.length > 0) {
+            imgcontainer.innerHTML = '';
+        }
+        let flat = [...this.userImages, ...this.defaultImages.random, ...this.defaultImages.png, ...this.defaultImages.gif];
+          flat.forEach((imageUrl) => {
+              const img = document.createElement('img');
+              img.src = imageUrl;
+              img.addEventListener('click', () => {
+                  const allImages = imgcontainer.querySelectorAll('img');
+                  allImages.forEach(img => img.style.border = 'none');
+                  img.style.border = '3px solid #4CAF50';
+                  this.selectedImage = imageUrl;
+              });
+              imgcontainer.appendChild(img);
+          });
+          
+    }
+
+    displayStartUI() {
+          let ui = document.body.querySelector('#start-ui') || document.createElement('div');
+          ui.id = 'start-ui';
+          let ih = `
+              <style>
+                #start-ui-container {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  height: 75vh;
+                  width: 100%;
+                  background-color: #f5f5f5;
+                  padding: 20px;
+                  box-sizing: border-box;
+                  border-radius: 10px;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                  position: relative;
+                  z-index: 1000;
+                }
+                #start-ui-image-container {
+                  display: flex;
+                  flex-wrap: nowrap;
+                  gap: 10px;
+                  width: 100%;
+                  margin: 20px 0;
+                  justify-content: flex-start;
+                  align-items: center;
+                  overflow-x: auto;
+                  overflow-y: hidden;
+                  max-height: 200px;
+                  padding-bottom: 15px;
+                }
+                #start-ui-image-container img {
+                  width: 150px;
+                  height: 150px;
+                  object-fit: cover;
+                  cursor: pointer;
+                  border-radius: 5px;
+                  transition: transform 0.2s;
+                }
+                #start-ui-image-container img:hover {
+                  transform: scale(1.05);
+                }
+                button {
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  background-color: #4CAF50;
+                  color: white;
+                  border: none;
+                  border-radius: 5px;
+                  cursor: pointer;
+                }
+                button:hover {
+                  background-color: #45a049;
+                }
+              </style>
+              <div id="start-ui-container">
+                  <h1>Welcome to the Slider Puzzle!</h1>
+                  <p>Choose your puzzle image:</p>
+                  <br/>
+                <label for="uploadButton" style="display: flex; align-items: center; gap: 5px;">
+                Custom Image:
+                <input name="uploadButton" type="file" id="uploadCustomImg" accept="image/*" aria-label="Upload Image"/>
+                </label>
+                </span>
+              </div>
+          `;
+          ui.innerHTML = ih;
+          document.body.appendChild(ui);
+          let uploadButton = document.body.querySelector('#uploadCustomImg');
+          uploadButton.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            const imgurl = URL.createObjectURL(file);
+            this.userImages.push(imgurl);
+            this.loadStartUIImages(imgcontainer);
+          });
+          let imgcontainer = document.createElement('div');
+          imgcontainer.id = 'start-ui-image-container';
+          this.loadStartUIImages(imgcontainer);
+
+          const container = ui.querySelector('#start-ui-container');
+          container.appendChild(imgcontainer);
+          const sizespan  = document.createElement('span');
+          sizespan.innerHTML = `                            <label for="puzzleSize" style="display: flex; align-items: center; gap: 5px;">
+                    Size:
+                    <select name="puzzleSize" id="puzzleSize" aria-label="Select Puzzle Size">
+                        <option value="3" selected>3 x 3</option>
+                        <option value="4">4 x 4</option>
+                        <option value="5">5 x 5</option>
+                        <option value="6">6 x 6</option>
+                        <option value="7">7 x 7</option>
+                        <option value="9">9 x 9</option>
+                        <option value="8">9 x 7</option>
+                    </select>
+                </label>`;
+          let breakline = document.createElement('br');
+          container.appendChild(sizespan);
+          container.appendChild(breakline);
+          const startButton = document.createElement('button');
+          startButton.innerText = 'Create Puzzle';
+          startButton.addEventListener('click', () => {
+              if (this.selectedImage) {
+                  this.puzzleState.imageUrl = this.selectedImage;
+                  this.shadowRoot.querySelector('#ogimg').src = this.selectedImage;
+                  this.initializeTiles();
+                  this.initializePuzzle();
+                  ui.remove();
+              } else {
+                  alert('Please select an image first!');
+              }
+          });
+        
+          container.appendChild(startButton);
+          const cancelButton = document.createElement('button');
+          cancelButton.innerText = 'Cancel';
+          cancelButton.addEventListener('click', () => {
+              ui.remove();
+          });
+          container.appendChild(cancelButton);
+          document.body.appendChild(ui);
+      }}
 customElements.define('slider-puzzle', SliderPuzzle);    
