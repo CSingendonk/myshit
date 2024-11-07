@@ -1,4 +1,16 @@
-class Import {
+/**
+ * @class Import
+ * @description Dynamically loads external scripts and manages their loading state.
+ * @param {string} [src=''] An optional string can be used in instantiation to shortcut the importation of the specified script.
+ * @property {string} src - The source URL of the script to load
+ * @property {boolean} loaded - Flag indicating if the script has been loaded
+ * @property {Array<string>} loadedScripts - Array of successfully loaded script URLs
+ * @property {Array<string>} paths - Array of script paths
+ * @property {Array<string>} queuedScripts - Array of scripts waiting to be loaded
+ * @property {Array<string>} failedScripts - Array of scripts that failed to load
+ * This class provides a convenient way to load scripts from an array of URLs and attach them to a target element.
+ * It also keeps track of loaded, queued, and failed scripts to avoid redundant loading.
+ */class Import {
     constructor(src = '') {        
         this.src = src;
         this.loaded = false;
@@ -46,26 +58,68 @@ class Import {
             return loadScript(sourceUrl);
         }
     };
-}
+    /**
+     * Handles the import of scripts, managing their loading state and attaching them to the target element.
+     * @param {string[]} [srcs=[]] - An array of script URLs to be imported.
+     * @param {HTMLElement} [target=null] - The target element to which the scripts will be attached.
+     * @returns {Import} - The current Import instance.
+     */
+    handleImport = (srcs = [], target = null) => {    
+           let paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderPuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
+           if (srcs.length > 0) {
+               paths = srcs;
+           }
+               const importer = this;
 
-document.loadExternalScripts = () => {    // Usage example
-        const paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
-            const importer = new Import();
-            const nest = document.createElement('div');
-            nest.id = 'scripts-div';
-            document.body.appendChild(nest);
-            const targetElement = document.querySelector('#scripts-div'); // Replace with your target element selector
-            if (paths.length > 0) {
-                importer.load(paths, targetElement)
-                    .then(() => {
-                        console.log('All scripts loaded successfully.');
-                    })
-                    .catch((error) => {
-                        console.error('Error loading scripts:', error);
-                    });
-            }
-            else {
-                console.log('No paths provided.');
-            }
+               const nest = document.querySelector('#scripts-div') != null ? document.querySelector('#scripts-div') : document.createElement('div');
+               nest.id = nest.hasAttribute('id') && nest.id?.length > 0 ? nest.id : 'scripts-div';
+               if (!document.querySelector('#scripts-div')) {
+                   document.body.appendChild(nest);
+               }
+               const targetElement = target != null ? target : document.querySelector('#scripts-div') ; // Replace with your target element selector
+               paths.forEach(p => {
+                    if (!importer.loadedScripts.includes(p)) {
+                        if (!importer.queuedScripts.includes(p)) {
+                            importer.queuedScripts.push(p);
+                        }
+                    }
+                    else {
+                        console.log('Skipping already loaded script:', p);
+                        paths.splice(paths.indexOf(p), 1);
+                    }
+               })
+               if (importer.queuedScripts.length > 0) {
+                   importer.load(importer.queuedScripts, targetElement)
+                       .then(() => {
+                           console.log('All scripts loaded successfully.');
+                           importer.loadedScripts.push(...this.queuedScripts);
+                           this.queuedScripts = [];
+                           importer.queuedScripts = [];
 
-        }
+   
+                       })
+                       .catch((error) => {
+                           console.error('Error loading scripts:', error);
+                           importer.failedScripts.push(...importer.queuedScripts);
+                       });
+               }
+               else {
+                   console.log('No paths provided.');
+               }
+               return importer;
+       }
+       static initialize = function() {
+        // Initialize the Import instance
+        // You can add any initialization logic here if needed
+        const importer = new Import();
+        document.loadExternalScripts = (srcs = [], target = null) => {  importer.handleImport(srcs, target); };
+        return importer;
+    }
+ }
+
+ /**
+ *@argument {string} [srcs=[]] - An array of script URLs to be imported.
+ *@argument {HTMLElement} [target=null] - The target element to which the scripts will be attached.
+ *@returns {Import} - The current Import instance.
+ */
+const importer = Import.initialize();
