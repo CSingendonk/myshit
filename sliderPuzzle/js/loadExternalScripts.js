@@ -65,7 +65,7 @@
      * @returns {Import} - The current Import instance.
      */
     handleImport = (srcs = [], target = null) => {    
-           let paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderPuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
+           let paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
            if (srcs.length > 0) {
                paths = srcs;
            }
