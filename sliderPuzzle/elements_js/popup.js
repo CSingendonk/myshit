@@ -12,7 +12,7 @@ openPuzzleDlgBtn.addEventListener('click', (event) => {
         }
     })
     const ce = document.createElement('slider-puzzle');
-    const pu = new PopupBox('Puzzle', [ce]);
+    const pu = new PopupBox('Puzzle', [ce], 'option');
     document.body['popups'].push(pu);
     pu.show();
 
@@ -113,7 +113,7 @@ helpButton.addEventListener('click', () => {
     ce.style.fontSize = '1.2em';
     ce.style.fontFamily = 'Arial';
 
-    let pu = new PopupBox('HELP', [ce]);
+    let pu = new PopupBox('HELP', [ce],[]);
     document.body['popups'].push(pu);
     pu.show();
     // Handle the "Help" button click event
@@ -148,12 +148,60 @@ class PopupBox extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.args = {
             title: title,
-            content: Array.from(contentElements),
+            content: contentElements,
             menuOptions: menuOptions,
-        };        
-        // Attach styles and dialog content to the shadow DOM
-        this.shadowRoot.append(this.createStyles(), this.createDialogStructure(title, contentElements));
+        };
+        this.content = this.args.content.length > 0 ? {...this.args.content} : {...Array.from(this.shadowRoot.children)}; 
+        this.dialog = this.createDialogStructure(title, contentElements);
+        this.shadowRoot.append(this.createStyles(), this.dialog);
         this.setMenuOptions(menuOptions);
+        this.#updateDialogContent();
+        this.show();
+        this.dialog.addEventListener('click', (event) => {
+            if (event.target != this.dialog && !this.shadowRoot.contains(event.target)) {
+                event.preventDefault();
+                this.hide();
+            }
+
+        });
+    }
+        // Attach styles and dialog content to the shadow DOM    }
+    static get observedAttributes() {
+        return ['title', 'content'];
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'title') {
+            this.dialog.querySelector('.dialog-header').textContent = newValue;
+        } else if (name === 'content') {
+            this.#updateDialogContent();
+        }
+    }
+
+    static updateDialogContent() {
+        const _this = document.querySelector('popup-box');
+        _this.updateDialogContent();
+    }
+
+    #updateDialogContent() {
+        this.shadowRoot.querySelector('#dialog-content').innerHTML = '';
+        this.shadowRoot.querySelector('#dialog-content').append((Array.from(this.content)).flatMap(content => {
+            if (content instanceof HTMLElement) {
+                return content;
+            } else if (typeof content === 'string') {
+                const div = document.createElement('div');
+                div.innerHTML = content;
+                return div.children;
+            } else if (Array.isArray(content)) {
+                return content;
+            } else {
+                return [];
+            }
+        }));
+    }
+
+    addContents(contentElements) {
+        this.content = Array.from(contentElements);
+        this.#updateDialogContent();
     }
 
     createStyles() {
@@ -222,17 +270,28 @@ class PopupBox extends HTMLElement {
         dialog.innerHTML = `
                             <drag-grip></drag-grip>
             <div class="dialog-header">
-                <span id="dialog-title">${title}</span>
+                <span>
+                    <h1 id="dialog-title">${title}</h1>
+                </span>
                 <span id="dialog-menubar">
-                    <slot name="menubar"></slot>
+                    <slot id="menubar-slot" name="menubar"></slot>
                 </span>
                 <button class="close-button dlg-close-btn" id="dlg-X-btn">✕</button>
             </div>
             <div class="dialog-content" id="dialog-content">
-                ${Array.from(contentElements).map(el => el.outerHTML).join('')}
+                <slot id="content-slot" name="content">
+                    <script>
+                        const contentElements.map(element => element.outerHTML).join('')
+                        document.getElementById('content-slot').innerHTML = 
+                    </script>
+                        <div>${[...Array.from(contentElements)]?.forEach(element => element.outerHTML)?.join('')}
+                    </script>
+                </slot>
             </div>
             <div class="dialog-footer">
-                <slot name="footer"></slot>
+                <slot name="footer-slot">
+                    <span>\&copy\;
+                </slot>
             </div>
         `;
 
@@ -272,11 +331,27 @@ class PopupBox extends HTMLElement {
             console.error('Menu options must be an array.');
             return;
         }
-        if (options.length === 0) {
+        if (options.length > 0) {
+            let i = 0;
             const defaultOption = {
-                label: 'File',
+                label: options[i].lable || 'File',
                 onClick: () => {
-                    console.log('File menu clicked');
+                    const menu = this.shadowRoot.querySelector('#dialog-menubar');
+                    const menuOptions = menu.querySelectorAll('.menu-option');
+                    if (menu.childElementCount > 0) {
+                        menuOptions.forEach(option => {
+                            option.classList.remove('active');
+                        });
+                    }
+                    else {
+                        menuOptions.forEach(option => {
+                            option.classList.add('active');
+                        });
+                    }
+                    menuOptions.forEach(option => {
+                        option.style.display = option.style.display === 'block' ? 'none' : 'block';
+                    });
+                    menu.childElementCount > 0 ? menu.style.display = 'inline' : menu.style.display = 'inline-flex';
                 }
             };
             this.options.push(defaultOption);
@@ -311,6 +386,37 @@ class PopupBox extends HTMLElement {
     // Method to update title
     setTitle(title) {
         this.shadowRoot.querySelector('#dialog-title').textContent = title;
+    }
+
+    // Method to update footer
+    setFooter(footer) {
+        const footerDiv = this.shadowRoot.querySelector('.dialog-footer');
+        footerDiv.innerHTML = '';
+        if (typeof footer === 'string') {
+            footerDiv.innerHTML = footer;
+            footerDiv.style.textAlign = 'center';
+        }
+        else if (footer instanceof Element) {
+            footerDiv.appendChild(footer);
+        }
+        else {
+            footerDiv.innerHTML = footer;
+            footerDiv.style.textAlign = 'center';
+        }
+        footerDiv.style.fontSize = '12px';
+        footerDiv.style.color = 'white';
+        footerDiv.style.fontWeight = 'bold';
+        footerDiv.style.fontFamily = 'Arial, sans-serif';
+        footerDiv.style.fontStyle = 'italic';
+        footerDiv.style.fontVariant = 'small-caps';
+        footerDiv.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
+        footerDiv.style.textDecoration = 'underline';
+        footerDiv.style.textDecorationColor = 'white';
+        footerDiv.style.textDecorationStyle = 'double';
+        footerDiv.style.textDecorationThickness = '2px';
+        footerDiv.style.textDecorationLine = 'underline';
+        footerDiv.style.textDecorationSkipInk = 'none';
+        footerDiv.style.textDecorationSkip = 'none';
     }
 }
 
