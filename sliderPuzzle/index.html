@@ -148,8 +148,51 @@
 document.body.popups = document.body.popups || [];
 
 aboutButton.addEventListener('click', () => {
-    alert('hi');
+    let existingPopup = document.body.popups.find(p => p.title === 'About');
+
+    if (existingPopup) {
+        // If the popup already exists, just show it
+        existingPopup.show();
+    } else {
+        // Create a new div element to hold the markdown content
+        const contentElement = document.createElement('div');
+        contentElement.id = 'about-content'; // Optional ID for styling
+
+        // Load and render the Markdown content
+        renderMarkdown('./misc/about.md', contentElement)
+            .then(() => {
+                // Create and display the popup after content is loaded
+                const newPopup = new PopupBox('About', [contentElement], 'option');
+                document.body.popups.push(newPopup);
+                newPopup.show();
+            })
+            .catch(error => {
+                console.error('Error loading the Markdown file:', error);
+                alert('Failed to load the About content.');
+            });
+    }
 });
+
+// Function to fetch and render Markdown content
+function renderMarkdown(fileUrl, targetElement) {
+    return fetch(fileUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch Markdown file: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(markdownText => {
+            if (typeof marked === 'undefined') {
+                throw new Error('Marked.js library is not loaded.');
+            }
+            // Convert Markdown to HTML
+            const htmlContent = marked.parse(markdownText);
+            // Set the HTML content to the target element
+            targetElement.innerHTML = htmlContent;
+        });
+}
+
 </script>
 
 </body>
