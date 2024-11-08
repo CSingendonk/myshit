@@ -38,11 +38,11 @@ class SliderPuzzle extends HTMLElement {
 
         }
         this.defaultImages = {
-                gif: ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/activegridanimation.gif',
-                'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/bouncingBallingManGiphy.gif'
+                gif: ['./pics/activegridanimation.gif',
+                './pics/bouncingBallingManGiphy.gif'
                 ],
-                png: ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/tbird.png',
-                'https://csingendonk.github.io/htmlpanels/sliderPuzzle/pics/runningb.png'],
+                png: ['./pics/tbird.png',
+                './pics/runningb.png'],
                 random: [
                     `https://picsum.photos/600/600/?random=${Math.random()}`, this.defaultImgUrl
                 ]
