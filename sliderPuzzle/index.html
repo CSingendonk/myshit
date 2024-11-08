@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>Slider Puzzle</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://csingendonk.github.io/htmlpanels/sliderPuzzle/css/style.css">
 </head>
 
 <body>
@@ -23,7 +23,7 @@
     </header>
     <main id="main-content">
     </main>
-    <script src="./js/loadExternalScripts.js"></script>
+    <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/js/loadExternalScripts.js"></script>
     <script id="ui-interaction-inititializer-script">
     // Get references to the buttons
     const helpButton = document.getElementById('help-button');
@@ -159,7 +159,7 @@ aboutButton.addEventListener('click', () => {
         contentElement.id = 'about-content'; // Optional ID for styling
 
         // Load and render the Markdown content
-        renderMarkdown('./misc/about.md', contentElement)
+        renderMarkdown('https://csingendonk.github.io/htmlpanels/sliderPuzzle/misc/about.md', contentElement)
             .then(() => {
                 // Create and display the popup after content is loaded
                 const newPopup = new PopupBox('About', [contentElement], 'option');
