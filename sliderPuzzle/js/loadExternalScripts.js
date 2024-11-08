@@ -64,8 +64,9 @@
      * @param {HTMLElement} [target=null] - The target element to which the scripts will be attached.
      * @returns {Import} - The current Import instance.
      */
-    handleImport = (srcs = [], target = null) => {    
-           let paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js'];
+    handleImport = (srcs = [], target = document.body) => {    
+        document.fullscreenEnabled = true;
+           let paths = ['./elements_js/sliderPuzzle.js', './elements_js/popup.js', './elements_js/draggrip.js', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js'];
            if (srcs.length > 0) {
                paths = srcs;
            }
@@ -76,7 +77,7 @@
                if (!document.querySelector('#scripts-div')) {
                    document.body.appendChild(nest);
                }
-               const targetElement = target != null ? target : document.querySelector('#scripts-div') ; // Replace with your target element selector
+               const targetElement = target != null ? target : document.querySelector('#scripts-div'); 
                paths.forEach(p => {
                     if (!importer.loadedScripts.includes(p)) {
                         if (!importer.queuedScripts.includes(p)) {
@@ -123,3 +124,5 @@
  *@returns {Import} - The current Import instance.
  */
 const importer = Import.initialize();
+document.loadExternalScripts();
+
