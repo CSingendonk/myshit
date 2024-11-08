@@ -745,7 +745,8 @@ class SliderPuzzle extends HTMLElement {
         template.innerHTML = `
           <button id="infotoggle"> ℹ️</button>
             <section id="puzzleInfo">
-            <button id="ogimage"><img id="ogimg" aria-hidden="true" style="display: none;"></button>
+            <button id="ogimage">PEEK</button>
+            <button id="savepuzzle">SAVE</button>
             <span>
             <button class="first_shuffle" id="shuffleButton">Shuffle</button>
             <div id="timer">Elapsed Time: 00:00</div>
@@ -1156,8 +1157,9 @@ class SliderPuzzle extends HTMLElement {
                 this.toggleOriginalImage();
             }
         });
+        shadow.getElementById('savepuzzle').addEventListener('click', () => this.saveGameData());
     }
-
+    
     loadRandomImage() {
                 this.puzzleState.imageUrl = 'https://picsum.photos/600/600/?random=' + Math.random();
                 this.shadowRoot.querySelector('#ogimg').src = this.puzzleState.imageUrl;
@@ -1216,8 +1218,13 @@ class SliderPuzzle extends HTMLElement {
                     detail: detail
                 }
             });
-            host.dispatchEvent(rszEvent);
+
+
+            host.rszHappening = true;
+            this.host = host;
         }
+
+
     };
 
     //listen for rsz events on the host
@@ -1228,6 +1235,7 @@ class SliderPuzzle extends HTMLElement {
             }
         }
         if (event.type === 'resize') {
+            
             this.resizePuzzle(event);
         }
     }
@@ -1243,8 +1251,11 @@ class SliderPuzzle extends HTMLElement {
 
 
     puzzleTileScale() {
-        let puzzleGrid = this.shadowRoot.getElementById('puzzleGrid');
-        let tileCount = Array.from(puzzleGrid.children).length;
+        let puzzleGrid = this.shadowRoot.getElementById('puzzleGrid') ? this.shadowRoot.getElementById('puzzleGrid') : false;
+        if (!puzzleGrid) {
+            return;
+        }
+        let tileCount = Array.from(puzzleGrid.children).length || this.puzzleState.size * this.puzzleState.size;
         let gridSize = Math.sqrt(tileCount);
         let tileSize = (parseInt(puzzleGrid.style.width) / gridSize) - (2 * gridSize); // Account for borders/gaps
 
@@ -1254,10 +1265,20 @@ class SliderPuzzle extends HTMLElement {
             tile.style.minWidth = `${tileSize}px`;
             tile.style.maxWidth = `${tileSize}px`;
         });
-        
-        puzzleGrid.style.minHeight = puzzleGrid.style.height;
-        puzzleGrid.style.minWidth = puzzleGrid.style.width;
-    }
+
+        const _a = parseInt(document.body.style.width) * 0.75;
+        const _b = parseInt(document.body.style.height) * 0.75;
+        const _c = Math.min(_a, _b);
+        const _d = Math.max(_a, _b);
+        const _e = _c / _d;
+        const _f = _e * 100;
+        puzzleGrid.style.maxWidth = `${_f}%`;
+        puzzleGrid.style.maxHeight = `${_f}%`;
+        puzzleGrid.style.minWidth = `${_f / 2}%`;
+        puzzleGrid.style.minHeight = `${_f / 2}%`;
+        puzzleGrid.style.width = `${_f}%`;
+        puzzleGrid.style.height = `${_f}%`;
+       }
 
     puzzleInfoScale() {
         const puzzleInfo = this.shadowRoot.getElementById('puzzleInfo');
@@ -1344,6 +1365,7 @@ class SliderPuzzle extends HTMLElement {
                     } else {
                         localStorage.setItem('sliderpuzzleHistory', JSON.stringify([this.puzzleState]));
                     }
+                    break;
                 }
                 // Shuffle the puzzle
                 this.shufflePuzzle();
@@ -1595,6 +1617,7 @@ class SliderPuzzle extends HTMLElement {
                   this.puzzleState.timerStart = Date.now() - item.time;
                   this.updateTimerDisplay();
                   historyContainer.remove();
+                  document.querySelector('#start-ui').remove();
               });
               historyGrid.appendChild(historyItem);
           });
