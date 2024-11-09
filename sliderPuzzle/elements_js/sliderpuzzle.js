@@ -1519,9 +1519,9 @@ class SliderPuzzle extends HTMLElement {
               `;
         let breakline = () => { return document.createElement('br') };
         container.appendChild(sizespan);
-        this.puzzleState.size = sizespan.getElementById('puzzleSize').value;
-        sizespan.getElementById('puzzleSize').addEventListener('change', (event) => {
-            this.puzzleState.size = sizespan.getElementById('puzzleSize').value;
+        this.puzzleState.size = container.querySelector('#puzzleSize').value;
+        container.querySelector('#puzzleSize').addEventListener('change', (event) => {
+            this.puzzleState.size = scontainer.querySelector('#puzzleSize').value;
         });
         let historybtn = document.createElement('button');
         historybtn.innerText = 'History';
