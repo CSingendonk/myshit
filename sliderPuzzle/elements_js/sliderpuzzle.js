@@ -1517,7 +1517,7 @@ class SliderPuzzle extends HTMLElement {
                   </select>
               </label>
               `;
-        let breakline = document.createElement('br');
+        let breakline = () => { return document.createElement('br') };
         container.appendChild(sizespan);
         this.puzzleState.size = sizespan.getElementById('puzzleSize').value;
         sizespan.getElementById('puzzleSize').addEventListener('change', (event) => {
@@ -1528,9 +1528,9 @@ class SliderPuzzle extends HTMLElement {
         historybtn.addEventListener('click', (event) => {
           this.showHistory(event);
         });
-        container.appendChild(breakline);
+        container.appendChild(breakline());
         container.appendChild(historybtn);
-        container.appendChild(breakline);
+        container.appendChild(breakline());
         const startButton = document.createElement('button');
         startButton.innerText = 'Create Puzzle';
         startButton.addEventListener('click', () => {
@@ -1551,6 +1551,7 @@ class SliderPuzzle extends HTMLElement {
         cancelButton.addEventListener('click', () => {
             ui.remove();
         });
+        container.appendChild(breakline());
         container.appendChild(cancelButton);
         document.body.appendChild(ui);
         this.startui = container;
