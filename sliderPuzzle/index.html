@@ -47,101 +47,31 @@
     document.body['popups'] = [];
     
     // Help button event listener
-    helpButton.addEventListener('click', () => {
-        Array.from(document.body['popups']).forEach(p => {
-            if (p.title === 'Help') {
-                p.show();
-                return;
-            }
-        })
-        const ce = document.createElement('div');
-        ce.innerHTML = `
-                        <style>
-                            p {
-                                font-size: 0.9rem; 
-                            }
+helpButton.addEventListener('click', () => {
+    let existingPopup = document.body.popups.find(p => p.title === 'Help');
 
-                            b {
-                                color: #0000009f;
-                                background-color: #ffffffaa;
-                                font-size: 1.1rem;
-                            }
-                        </style>    
-                        
-                        
-                        <dl><dt><b>How to Play</b></dt>
-                            <dd>
-                            <p>
-                            <b>Objective:</b>
-                            <br>
-                            The puzzle consists of a grid of numbered tiles. The goal is to rearrange the tiles to correctly display the image.
-                            </p>
-                            <p>
-                            <b>Moving Tiles</b>
-                            <br>
-                            To move a tile it must be adjacent to the free space in the puzzle. The tile will slide into the empty space when you click or tap it.
-                            </p>
-                            <p>
-                            <b>Resetting the Puzzle</b>
-                            <br>
-                            If you get stuck or want to start over, you can reset the puzzle by clicking the "Reset" button.
-                            </p>
-                            <p>
-                            <b>Winning the Game</b>
-                            <br>
-                            The game is won when the puzzle is solved.
-                            </p>
-                            <p>
-                            <b>Tips</b>
-                            <br>
-                            - Try to solve the puzzle in the fewest moves possible.
-                            <br>
-                            - Use the "Reset" button to start over if you get stuck.
-                            <br>
-                            - Use the "Help" button to get tips and hints.
-                            </p>
-                            </dd>
-                            <dt><b>General</b></dt>
-                            <dd>
-                            <p>
-                            <b>Reference</b>
-                            <br>
-                            To view the image as it should look, click the "HINT" button.
-                            </p>
-                            <p>
-                            <b>Move and Resize</b>
-                            <br>
-                            To move the puzzle around, click and drag the puzzle.
-                            <br>
-                            To resize the puzzle, click and drag the bottom right corner.
-                            </p>
-                            <p>
-                            <b>Keyboard Shortcuts</b>
-                            <br>
-                            - Press "R" to reset the puzzle.
-                            <br>
-                            - Press "H" to show the puzzle image when solved.
-                            <br>
-                            - Press "S" to randomly shuffle the puzzle tiles.
-                            <br>
-                            - Press "N" to start a new puzzle with a random image.
-                            <br>
-                            
-                            - Use the arrow keys to move the empty space of the puzzle.
-                            <br>
-                            - Use the file upload button to upload your own image to use as the puzzle.
-                            <br>
-                        </p>
-                        </dd>
-                        </dl>`;
-        ce.style.color = '#44aa119f';
-        ce.style.fontSize = '1.2em';
-        ce.style.fontFamily = 'Arial';
+    if (existingPopup) {
+        // If the popup already exists, just show it
+        existingPopup.show();
+    } else {
+        // Create a new div element to hold the markdown content
+        const contentElement = document.createElement('div');
+        contentElement.id = 'help-content'; // Optional ID for styling
 
-        let pu = new PopupBox('HELP', [ce], []);
-        document.body['popups'].push(pu);
-        pu.show();
-    });
+        // Load and render the Markdown content
+        renderMarkdown('https://csingendonk.github.io/htmlpanels/sliderPuzzle/misc/help.md', contentElement)
+            .then(() => {
+                // Create and display the popup after content is loaded
+                const newPopup = new PopupBox('Help', [contentElement], 'option');
+                document.body.popups.push(newPopup);
+                newPopup.show();
+            })
+            .catch(error => {
+                console.error('Error loading the Markdown file:', error);
+                alert('Failed to load the About content.');
+            });
+    }
+});
 
     // About button event listener
    // Initialize the popups array if not already done
