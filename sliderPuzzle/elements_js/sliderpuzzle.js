@@ -1521,7 +1521,7 @@ class SliderPuzzle extends HTMLElement {
         container.appendChild(sizespan);
         this.puzzleState.size = container.querySelector('#puzzleSize').value;
         container.querySelector('#puzzleSize').addEventListener('change', (event) => {
-            this.puzzleState.size = scontainer.querySelector('#puzzleSize').value;
+            this.puzzleState.size = container.querySelector('#puzzleSize').value;
         });
         let historybtn = document.createElement('button');
         historybtn.innerText = 'History';
