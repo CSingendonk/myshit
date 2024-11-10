@@ -34,3 +34,16 @@ To include the slider puzzle on your webpage, use the `<slider-puzzle>` custom e
 ```
 The component uses the slider-puzzle.js script hosted on GitHub and written by © CSingendonk, to handle the game logic, image loading, and user interactions.
 </details>
+
+
+# 🎲 **3D Dice Web Component**
+
+<details>
+  <summary>...</summary>
+  |  ~      ~   |
+     |  ,   |
+  |____________|
+     | | | |
+      |_|_|
+  No dice on the dice discription homie.
+</details>
