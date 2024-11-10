@@ -1,97 +1,24 @@
-
-class DragGrip extends HTMLElement {
-    constructor() {
-        super();
-        this.isDragging = false;
-        this.initialMousePosition = { x: 0, y: 0 };
-        this.initialParentPosition = { x: 0, y: 0 };
-    }
-
-    connectedCallback() {
-        this.setStyle();
-        this.attachDragListeners();
-    }
-
-    setStyle() {
-        Object.assign(this.style, {
-            cursor: 'grab',
-            display: 'inline-flex',
-            backgroundColor: 'skyblue',
-            padding: '0.1rem',
-            userSelect: 'none',
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            width: '0.9rem',
-            height: '0.9rem',
-            fontSize: '0.75rem'
-        });
-        this.textContent = '⁛';
-        const parent = this.parentElement;
-        if (parent) parent.style.position = 'absolute';
-    }
-
-    attachDragListeners() {
-        this.addEventListener('mousedown', this.onMouseDown.bind(this));
-        document.addEventListener('mousemove', this.onMouseMove.bind(this));
-        document.addEventListener('mouseup', this.onMouseUp.bind(this));
-    }
-
-    onMouseDown(e) {
-        this.isDragging = true;
-        this.initialMousePosition = { x: e.clientX, y: e.clientY };
-        this.style.cursor = 'grabbing';
-
-        const parent = this.parentElement;
-        if (parent) {
-            this.initialParentPosition = { x: parent.offsetLeft, y: parent.offsetTop };
-        }
-        e.preventDefault(); // Prevent text selection
-    }
-
-    onMouseMove(e) {
-        if (!this.isDragging) return;
-
-        const deltaX = e.clientX - this.initialMousePosition.x;
-        const deltaY = e.clientY - this.initialMousePosition.y;
-        const newX = this.initialParentPosition.x + deltaX;
-        const newY = this.initialParentPosition.y + deltaY;
-
-        const parent = this.parentElement;
-        if (parent) {
-            parent.style.left = `${newX}px`;
-            parent.style.top = `${newY}px`;
-        }
-    }
-
-    onMouseUp() {
-        if (this.isDragging) {
-            this.isDragging = false;
-            this.style.cursor = 'grab';
-        }
-    }
-}
-
 class DiceRoller extends HTMLElement {
     constructor() {
         super();
         const shadow = this.attachShadow({ mode: 'open' });
-
+        this.wglrenderer;
         // Create the container for the dice
         const container = document.createElement('div');
         container.setAttribute('id', 'dice-container');
         container.innerHTML = `
-                        <div id="drag-grip" class="grip" style="z-index:99>⁞⁞</div>
-
-            <div id="titlebar" class="titlebar">
-                <span id="title">Dice Roller</span>
-                <button id="minimize-button">—</button>
-                <button id="maximize-button">🗖</button>
-                <button id="close-button">✕</button>
+            <div id="titlebar">
+            ⁞⁝⁚
+                <span id="title">Dice</span>
+                <div id="window-controls">
+                    <button id="minimize-button">—</button>
+                    <button id="maximize-button">🗖</button>
+                    <button id="close-button">✕</button>
+                </div>
             </div>
 
-            <div id="dice-controls">                        <div id="webgl-output"></div>
-
+            <div id="dice-controls"> 
+            <div id="webgl-output"></div>
                 <br/><hr/>
                 <label for="dice-type">Choose Dice Type:</label>
                 <select id="dice-type">
@@ -259,21 +186,67 @@ class DiceRoller extends HTMLElement {
             ::-webkit-scrollbar-thumb:hover {
                 background: #4a6278;
             }
+                         /* Titlebar Styling */
+            #titlebar {
+                background-color: #2c3e50;
+                color: white;
+                padding: 10px;
+                cursor: move;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                user-select: none;
+            }
+
+            #titlebar #title {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            #window-controls button {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                padding: 0 5px;
+                line-height: 1;
+                transition: color 0.2s;
+            }
+
+            #window-controls button:hover {
+                color: #ff6666;
+            }
+
+            /* Fade-out Animation */
+            .fade-out {
+                animation: fadeOut 0.3s forwards;
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
         `;
 
         shadow.appendChild(style);
         shadow.appendChild(container);
         container.classList.add('slide-in');
         this.container = container;
-
         // Initialize properties
         this.diceMeshes = [];
         this.diceBodies = [];
         this.diceValues = [];
         this.animationFrameId = null;
-
+        
         // Initialize drag functionality
-        this.initDragGrip();
+        //this.initDragGrip();
     }
 
     connectedCallback() {
@@ -337,6 +310,7 @@ class DiceRoller extends HTMLElement {
         this.createDice(parseInt(diceTypeSelect.value), parseInt(diceCountInput.value));
     }
 
+    rendererdomElement = this.wglrenderer;
     /**
      * Initialize Three.js components
      */
@@ -349,28 +323,33 @@ class DiceRoller extends HTMLElement {
         const webglOutput = this.shadowRoot.getElementById('webgl-output');
         webglOutput.innerHTML = ''; // Clear previous renderer
         webglOutput.appendChild(this.renderer.domElement);
-
+        this.wglrenderer = this.renderer;
+        this.rendererdomElement = this.renderer.domElement;
         // Add lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
         this.scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 10, 7.5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(0, 25, 0);
+        directionalLight.castShadow = false;
         this.scene.add(directionalLight);
 
         // Position the camera
-        this.camera.position.z = 10;
+        this.camera.position.z = -10;
+        this.camera.position.y = 5;
+        this.camera.position.x = 0;
 
         // Update camera position based on dice count
         const diceCountInput = this.shadowRoot.getElementById('dice-count');
         diceCountInput.addEventListener('change', () => {
             const diceCount = parseInt(diceCountInput.value);
-            this.camera.position.y = 10 + (diceCount - 1) * 2; // Adjust y based on dice count
+            this.camera.position.y = (5 + (diceCount - 1) * 2); // Adjust y based on dice count
             this.camera.lookAt(0, 0, 0);
         });
 
         this.camera.lookAt(0, 0, 0);
     }
 
+    
     /**
      * Initialize Cannon.js physics world
      */
@@ -384,12 +363,19 @@ class DiceRoller extends HTMLElement {
         this.world.solver.iterations = 10;
 
         // Add a floor plane
+
         const groundMaterial = new CANNON.Material();
         const groundShape = new CANNON.Plane();
         const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial });
         groundBody.addShape(groundShape);
         groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+        const wall = new CANNON.Plane();
+        const wallbody = new CANNON.Body({ mass: 0, material: groundMaterial });
+        wallbody.addShape(wall);
+        wallbody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI / 2);
+        wallbody.position.set(5, 0, 0);
         this.world.addBody(groundBody);
+        this.world.addBody(wallbody);
     }
 
     /**
@@ -463,14 +449,13 @@ class DiceRoller extends HTMLElement {
                     shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
                     faceLabels = ['1', '2', '3', '4', '5', '6'];
             }
-
-            // Create materials with face labels
             const materials = this.createFaceMaterials(geometry, faceLabels, sides);
 
             // Create Three.js mesh
             const diceMesh = new THREE.Mesh(geometry, materials);
             diceMesh.userData.faceLabels = faceLabels;
             this.scene.add(diceMesh);
+            // Create materials with face label
 
             // Create Cannon.js body
             const diceBody = new CANNON.Body({ mass: 1, shape: shape });
@@ -487,43 +472,58 @@ class DiceRoller extends HTMLElement {
             this.diceValues.push({ sides: sides, value: Math.floor(Math.random() * sides) + 1 });
         }
     }
-
-    // Create face materials with number textures
+    /** 
+ * Create materials for each face of the dice with labels
+ * @param {THREE.BufferGeometry} geometry - The geometry of the dice
+ * @param {Array<string>} faceLabels - Labels for each face
+ * @param {number} sides - Number of sides on the dice
+ * @returns {Array<THREE.Material>} - Array of materials for the dice
+ */
     createFaceMaterials(geometry, faceLabels, sides) {
-        const materials = [];
-        const numFaces = sides;
+    const materials = [];
+    const numFaces = sides;
 
-        for (let i = 0; i < numFaces; i++) {
-            const label = faceLabels[i % faceLabels.length];
+    for (let i = 0; i < numFaces; i++) {
+        const label = faceLabels[i % faceLabels.length];
 
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 256;
-            const context = canvas.getContext('2d');
+        // Create canvas for each face texture
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; // Smaller width for better performance, but should be enough to see details
+        canvas.height = 256;
+        const context = canvas.getContext('2d');
 
-            // Background
-            context.fillStyle = '#ffffff';
-            context.fillRect(0, 0, canvas.width, canvas.height);
+        // Set up the background
+        context.fillStyle = '#ffffff'; // Set white background to ensure visibility of numbers
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Text
-            context.fillStyle = '#000000';
-            context.font = 'bold 150px Arial';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(label, canvas.width / 2, canvas.height / 2);
+        // Draw the face number
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.font = `bold 150px Arial`;
+        context.fillStyle = '#000000'; // Use black text to ensure high contrast
+        context.fillText(label, canvas.width / 2, canvas.height / 2);
 
-            // Create texture from canvas
-            const texture = new THREE.CanvasTexture(canvas);
-            materials.push(new THREE.MeshBasicMaterial({ map: texture }));
-        }
+        // Create texture from the canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;  // Mark texture as needing an update
 
-        geometry.clearGroups();
-        for (let i = 0; i < numFaces; i++) {
-            geometry.addGroup(i * 3, 3, i);
-        }
-
-        return materials;
+        // Create material with the texture
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        materials.push(material);
     }
+
+    // Assign materials to geometry faces
+    geometry.clearGroups();
+    for (let i = 0; i < numFaces; i++) {
+        geometry.addGroup(i * (geometry.index.count / numFaces), geometry.index.count / numFaces, i);
+    }
+
+    return materials;
+}
+
+
+
+
 
     /**
      * Convert Three.js geometry to Cannon.js ConvexPolyhedron
@@ -575,7 +575,7 @@ class DiceRoller extends HTMLElement {
                 0
             );
             diceBody.angularVelocity.set(
-                (Math.random() + 1 )* 20,
+                (Math.random() + 1) * 20,
                 (Math.random() + 1) * 20,
                 (Math.random() + 1) * 20
             );
@@ -596,7 +596,12 @@ class DiceRoller extends HTMLElement {
         let lastTime;
         const maxSimulationTime = 10000; // Max simulation time in ms
         const startTime = performance.now();
-
+        let biggestX = this.diceBodies[0].position.x;
+        let biggestY = this.diceBodies[0].position.y + 15;
+        let biggestZ = this.diceBodies[0].position.z;
+        let lowestX = this.diceBodies[0].position.x;
+        let lowestY = this.diceBodies[0].position.y;
+        let lowestZ = this.diceBodies[0].position.z;
         const update = (time) => {
             if (!lastTime) lastTime = time;
             const delta = (time - lastTime) / 1000;
@@ -619,7 +624,13 @@ class DiceRoller extends HTMLElement {
             this.renderer.render(this.scene, this.camera);
             this.animationFrameId = requestAnimationFrame(update);
             this.camera.position.x = this.diceBodies[0].position.x;
-                        // Check if dice have stopped moving
+            this.camera.position.y = this.diceBodies.length * 2 + 10;
+            this.camera.position.z = -5 - Math.abs(this.diceBodies[0].position.z);
+            this.camera.lookAt(0, 0, 0);
+            this.world.step(timeStep, delta, 3);
+            // Update Three.js mesh positions and rotations from Cannon.js physics
+
+            // Check if dice have stopped moving
             if (this.diceBodies.every(body => body.sleepState === CANNON.Body.SLEEPING)) {
                 this.getDiceResult();
             }
@@ -898,50 +909,11 @@ class DiceRoller extends HTMLElement {
      * Initialize drag functionality for the panel
      */
     initDragGrip() {
-        const dragGrip = this.shadowRoot.getElementById('drag-grip');
-        const panel = this.shadowRoot.getElementById('dice-container');
-        let isDragging = false;
-        let initialMousePosition = { x: 0, y: 0 };
-        let initialPanelPosition = { x: 0, y: 0 };
-
-        // Ensure the panel is positioned absolutely so that dragging works
-        panel.style.position = 'absolute';
-
-        // Handle mousedown event to start dragging
-        dragGrip.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            initialMousePosition.x = e.clientX;
-            initialMousePosition.y = e.clientY;
-            initialPanelPosition.x = panel.offsetLeft;
-            initialPanelPosition.y = panel.offsetTop;
-
-            // Prevent text selection while dragging
-            e.preventDefault();
-        });
-
-        // Handle mousemove event for dragging
-        const onMouseMove = (e) => {
-            if (!isDragging) return;
-
-            const deltaX = e.clientX - initialMousePosition.x;
-            const deltaY = e.clientY - initialMousePosition.y;
-            const newX = initialPanelPosition.x + deltaX;
-            const newY = initialPanelPosition.y + deltaY;
-
-            panel.style.left = `${newX}px`;
-            panel.style.top = `${newY}px`;
-        };
-
-        // Handle mouseup event to stop dragging
-        const onMouseUp = () => {
-            if (isDragging) {
-                isDragging = false;
-            }
-        };
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    }
+        this.container.prepend(document.createElement('drag-grip'));
+        let dgscript = document.createElement('script');
+        dgscript.src = 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js';
+        this.container.appendChild(dgscript);
+     }
 
     /**
      * Close the dice roller panel
@@ -975,7 +947,7 @@ class DiceRoller extends HTMLElement {
 
         if (isMaximized) {
             // Restore to original size
-            panel.style.width = '650px';
+            panel.style.width = 'auto';
             panel.style.height = 'auto';
             panel.classList.remove('maximized');
         } else {
@@ -988,7 +960,3 @@ class DiceRoller extends HTMLElement {
 }
 
 customElements.define('dice-roller', DiceRoller);
-
-
-customElements.define('drag-grip', DragGrip);
-
