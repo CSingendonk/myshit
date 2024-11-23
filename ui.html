@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Listener</title>
+</head>
+
+<body>
+    <script>
+        class ConsoleListener extends HTMLElement {
+            constructor() {
+                super();
+
+
+                this.ogconsole = console;
+
+                this.maxMessages = parseInt(this.getAttribute('max-messages'), 10) || 100;
+                this.position = this.getAttribute('position') || 'top-right';
+                this.initializeUI();
+                this.messageCount = 0;
+                this.addEventListeners();
+                this.logs = [];
+                this.removedMessages = [];
+                this.globalcount = 0;
+                this.incrementCount = this.incrementalCounter();
+                this.countup = () => { console.log(this.incrementCount.next().value); }
+            }
+
+            static addTimeDetails(details = 'A vague bit of trivia', idea = null) {
+                const deets = document.createElement('details');
+                deets.className = `details-element`;
+                deets.innerHTML = `<p>${details}</p>`;
+                if (idea) {
+                    idea.appendChild(deets);
+                    deets.title = 'hi';
+                    deets.textContent = '\n' + details;
+                }
+                else {
+                    document.body.querySelector('.console-ui').lastChild.prepend(deets);
+                }
+            }
+
+
+            static time = (details = 'Current Console Date & Time') => {
+                const t = ConsoleListener.getTimeString();
+                const d = ConsoleListener.getDateString();
+                console.log('Time:  ', t);
+                ConsoleListener.addTimeDetails(d + '\n' + details);
+
+            }
+
+            static getTimeString() {
+                const date = new Date();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+                const t = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+                return t;
+            }
+
+            static getDateString() {
+                const date = new Date();
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const dayName = days[date.getDay()];
+                const monthName = months[date.getMonth()];
+                return `${dayName} ${monthName} ${date.getDate()}, ${date.getFullYear()}`;
+            }
+            static timeStamp = () => {
+                const date = new Date();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+                this.caller['timeStamp'] = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+                let c = { caller: this.caller.name, timeStamp: this.caller['timeStamp'] };
+                ConsoleListener.time(JSON.stringify(c));
+                return this.caller;
+            }
+
+            static caller = {
+                name: 'console',
+                timeStamp: '00:00:00.000',
+                time: '00:00:00.000',
+
+            };
+
+
+            *incrementalCounter() {
+                let count = 0;
+                while (true) {
+                    yield count;
+                    count++;
+                }
+            }
+
+
+            logNextIncrement() {
+                if (!this._generator) {
+                    this._generator = this.countup();
+                }
+                const nextValue = this._generator.next().value;
+                console.log(`Increment: ${nextValue}`);
+                return nextValue;
+            }
+
+
+            tableout = (data) => { console.table.bind(this) };
+
+            connectedCallback() {
+                this.setupConsoleOverrides();
+                this.log = console.log;
+
+            }
+
+            disconnectedCallback() {
+                this.removeEventListeners();
+            }
+
+            removeEventListeners() {
+                document.removeEventListener('keydown', this.handleKeyDown);
+                window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+            }
+
+            unhandledrejectionhandler(event) {
+                this.addMessage('error', [`Unhandled Promise Rejection: ${event.reason}`]);
+            }
+
+            addEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === '`') {
+                        this.ui.style.display = this.ui.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+
+                // Global error handling
+                window.onerror = (message, source, lineno, colno, error) => {
+                    this.addMessage('error', [
+                        `Global Error: ${message}`,
+                        `Source: ${source}`,
+                        `Line: ${lineno}, Column: ${colno}`,
+                        error,
+                    ]);
+                };
+
+                // Performance monitoring
+                window.addEventListener('load', () => {
+                    const timing = performance.getEntriesByType('navigation')[0];
+                    this.addMessage('info', [
+                        'Page Load Metrics:',
+                        `Total Load Time: ${timing.loadEventEnd - timing.navigationStart}ms`,
+                        `DOM Content Loaded: ${timing.domContentLoadedEventEnd - timing.navigationStart}ms`
+                    ]);
+                });
+
+                // Network status
+                window.addEventListener('online', () => {
+                    this.addMessage('info', ['Network connection restored']);
+                });
+
+                window.addEventListener('offline', () => {
+                    this.addMessage('warn', ['Network connection lost']);
+                });
+
+                // Resource loading errors
+                document.addEventListener('error', (e) => {
+                    if (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+                        this.addMessage('error', [`Failed to load resource: ${e.target.src || e.target.href}`]);
+                    }
+                }, true);
+
+                // User visibility changes
+                document.addEventListener('visibilitychange', () => {
+                    this.addMessage('debug', [`Page visibility changed to: ${document.visibilityState}`]);
+                });
+
+                // Unhandled Promise rejections
+                window.addEventListener('unhandledrejection', this.unhandledrejectionhandler.bind(this));
+
+                // Fetch request monitoring
+                const originalFetch = window.fetch;
+                this.ogfetch = originalFetch;
+
+                window.fetch = (...args) => {
+                    this.addMessage('info', [`Fetch Request: ${args[0]}`]);
+                    return originalFetch.apply(this, args)
+                        .then((response) => {
+                            this.addMessage('info', [`Fetch Response: ${response.url}`, `Status: ${response.status}`]);
+                            return response;
+                        })
+                        .catch((error) => {
+                            this.addMessage('error', [`Fetch Error: ${error.message}`]);
+                            throw error;
+                        });
+                };
+            }
+
+            clearConsole() {
+                while (this.ui.children.length > 2) {
+                    this.removedMessages.push(`${this.ui.lastChild}`);
+                    this.ui.removeChild(this.ui.lastChild);
+                }
+                this.messageCount = 0;
+            }
+            createMessageElement(args, type) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = 'message-wrapper';
+                messageWrapper.dataset.messageType = type;
+                messageWrapper.style.setProperty('--message-border-color', this.getColorForType(type));
+
+                const message = document.createElement('div');
+                message.className = 'console-message';
+                message.innerHTML = this.formatMessageContent(args);
+
+                const messageControls = this.createMessageControls(message, messageWrapper);
+                messageWrapper.appendChild(message);
+                messageWrapper.appendChild(messageControls);
+
+                const timeStamp = ConsoleListener.getTimeString();
+                const timeElement = ConsoleListener.addTimeDetails(timeStamp, messageWrapper);
+
+                this.addMessageHoverEffects(messageWrapper);
+                return messageWrapper;
+            }
+
+            createMessageControls(message, messageWrapper) {
+                const messageControls = document.createElement('div');
+                messageControls.className = 'message-controls';
+
+                const controls = [
+                    {
+                        className: 'copy-btn',
+                        innerHTML: '📋',
+                        title: 'Copy message',
+                        onClick: () => this.copyMessageToClipboard(message.textContent)
+                    },
+                    {
+                        className: 'close-btn-message',
+                        innerHTML: '×',
+                        title: 'Remove message',
+                        onClick: () => this.removeMessage(messageWrapper)
+                    }
+                ];
+
+                controls.forEach(control => {
+                    const button = document.createElement('button');
+                    Object.assign(button, control);
+                    button.onclick = control.onClick;
+                    messageControls.appendChild(button);
+                });
+
+                return messageControls;
+            }
+
+            copyMessageToClipboard(text) {
+                navigator.clipboard.writeText(text)
+                    .then(() => this.addMessage('info', ['Message copied to clipboard']))
+                    .catch(err => this.addMessage('error', ['Failed to copy message:', err]));
+            }
+
+            removeMessage(messageWrapper) {
+                messageWrapper.classList.add('fade-out');
+                setTimeout(() => {
+                    messageWrapper.remove();
+                    this.messageCount--;
+                }, 300);
+            }
+
+            formatMessageContent(args) {
+                return args.map(arg => {
+                    if (arg === null) return 'null';
+                    if (arg === undefined) return 'undefined';
+                    if (Array.isArray(arg)) return this.formatArray(arg);
+                    if (typeof arg === 'object') return this.formatObject(arg);
+                    return this.escapeHTML(String(arg));
+                }).join(' ');
+            }
+
+            formatArray(arr) {
+                try {
+                    return `<pre>[${arr.map(item => this.formatMessageContent([item])).join(', ')}]</pre>`;
+                } catch (e) {
+                    return String(arr);
+                }
+            }
+
+            formatObject(obj) {
+                try {
+                    return `<pre>${JSON.stringify(obj, null, 2)}</pre>`;
+                } catch (e) {
+                    return String(obj);
+                }
+            }
+
+            escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            getColorForType(type) {
+                const colors = {
+                    log: '#4CAF50',
+                    info: '#2196F3',
+                    warn: '#FF9800',
+                    error: '#F44336',
+                    debug: '#9C27B0',
+                    success: '#00C853',
+                    trace: '#607D8B'
+                };
+                return colors[type] || colors.log;
+            }
+
+            addMessageHoverEffects(messageWrapper) {
+                messageWrapper.addEventListener('mouseenter', () => {
+                    messageWrapper.style.backgroundColor = 'var(--message-hover-bg)';
+                });
+                messageWrapper.addEventListener('mouseleave', () => {
+                    messageWrapper.style.backgroundColor = '';
+                });
+            }
+
+            appendMessage(args, type) {
+                const messageElement = this.createMessageElement(args, type);
+                this.ui.appendChild(messageElement);
+                this.messageCount++;
+                this.trimOldMessages();
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+
+            trimOldMessages() {
+                const maxMessages = 1000;
+                while (this.messageCount > maxMessages) {
+                    this.ui.removeChild(this.ui.children[2]);
+                    this.messageCount--;
+                }
+            }
+
+            initializeUI() {
+                this.ui = document.createElement('div');
+                this.ui.className = 'console-ui';
+
+                this.ui.appendChild(this.stylize());
+
+                if (this.position === 'bottom-right') {
+                    this.ui.style.bottom = '0';
+                    this.ui.style.top = 'auto';
+                }
+
+                const header = document.createElement('div');
+                header.className = 'console-header';
+
+                const title = document.createElement('span');
+                title.className = 'console-title';
+                title.textContent = 'Console';
+
+                const controls = document.createElement('div');
+                controls.className = 'console-controls';
+
+                const clearButton = document.createElement('button');
+                clearButton.textContent = 'Clear';
+                clearButton.onclick = () => this.clearConsole();
+
+                const closeButton = document.createElement('button');
+                closeButton.textContent = '×';
+                closeButton.className = 'close-btn';
+                closeButton.onclick = () => this.ui.style.display = 'none';
+
+                controls.appendChild(clearButton);
+                controls.appendChild(closeButton);
+                header.appendChild(title);
+                const h = document.createElement('div');
+                h.style.display = 'contents';
+                h.appendChild(header);
+                header.appendChild(controls);
+                this.ui.appendChild(h);
+                return h;
+            }
+
+            stylize() {
+                const styletext = `
+        :root {
+            --message-border-color: pink;
+            --message-padding: 1%;
+            --message-font-size: 1rem;
+            --message-line-height: 0.9rem;
+            --message-hover-bg: rgba(255, 255, 255, 0.25);
+            --method-bg-log: rgba(255, 255, 255, 0.1);
+            --method-bg-info: rgba(88, 166, 255, 0.1);
+            --method-bg-warn: rgba(210, 153, 34, 0.1);
+            --method-bg-error: rgba(248, 81, 73, 0.1);
+            --method-bg-debug: rgba(139, 148, 158, 0.1);
+            --method-color-log: #fff;
+            --method-color-info: #58a6ff;
+            --method-color-warn: #d29922;
+            --method-color-error: #f85149;
+            --method-color-debug: #8b949e;
+            --method-color-trace: #58a6ff;
+            --console-bg: rgba(0, 0, 0, 0.75);
+            --console-color: white;
+        }
+
+        *{
+            box-sizing: content-box;
+            margin: 1px;
+            padding: 1px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1rem;
+            color: lightblue;
+                scrollbar-color: red;
+            scrollbar-width: thin;
+            scroll: smooth;
+        }
+
+        .console-message {
+            border-bottom: 1px solid var(--message-border-color);
+            padding: var(--message-padding);
+            font-size: var(--message-font-size);
+            line-height: var(--message-line-height);
+            transition: all 0.2s ease;
+            width: 100%;
+
+
+        }
+
+
+        .console-message:hover {
+            background-color: var(--message-hover-bg);
+            overflow: auto;
+        }
+
+        .method-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--method-color-log);
+        }
+
+        .console-ui {
+            position: relative;
+
+            width: fit-content;
+            max-width: 90vmin;
+            max-height: 90vh;
+            overflow-x: hidden;
+            resize: both;
+            background-color: var(--console-bg);
+            color: var(--console-color);
+            padding: 2%;
+            font-family: Monaco, Consolas, monospace;
+            z-index: 9999;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            scrollbar: none;
+            min-width: min-content;
+            overflow-y: scroll
+        }
+
+        .detail, details {
+            curson: pointer;
+        }
+
+        .console-header {
+            display: inline-flex;
+            justify-content: space-between;
+            align-items: start;
+            border-bottom: 0.25rem double yellow;
+            padding: 1%;
+            border-radius: 6px;
+            width: 100%;
+            background-color: #222222ff;
+            position: relative;
+            z-index: 1;
+            margin: 0px auto;
+            min-width: max-content;
+        }
+
+        .console-title {
+            font-weight: bold;
+            position: relative;
+            font-size: 0.9rem;
+            margin: 0px auto;
+            display: inline-flex;
+
+        }
+
+        .console-controls {
+            display: flex;
+            align-items: center;
+            position: sticky;
+            z-index: 100
+        }
+
+        .console-controls button {
+            margin-right: 5px;
+            padding: 3px 8px;
+            border: 1px solid #444;
+            border-radius: 3px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            padding: 3px 8px;
+            border: 1px solid #444;
+            border-radius: 3px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .message-wrapper {
+            position: relative;
+            margin-bottom: 5px;
+            border-left: 4px solid var(--message-border-color);
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            max-width: 100%;
+            display: inline-flex;
+            resize: vertical;
+        }
+
+        .close-btn-message {
+            position: sticky;
+            right: 1px;
+            top: 1px;
+            margin: 0px;
+            border: 1px solid #444;
+            background-color: #000000ff;
+            color: white;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+            font-weight: bold;
+
+        }
+
+        .message-wrapper:hover .close-btn-message {
+            opacity: 1;
+        }
+        
+                `;
+
+
+                const style = document.createElement('style');
+                style.textContent = styletext;
+                return style;
+            }
+
+            connectedCallback() {
+                this.setupConsoleOverrides();
+            }
+
+            setupConsoleOverrides() {
+                const ogc = Object.entries(console);
+                const ogmethodsarray = Object.keys(console);
+
+                ogmethodsarray.forEach(method => {
+                    const originalMethod = () => console[method];
+                    console[method] = (...args) => {
+                        if (this.messageCount >= this.maxMessages) {
+                            this.clearConsole();
+                        }
+                        this.addMessage(method, args);
+                        originalMethod.bind(console)(...args);
+
+                    };
+                });
+                let nc = this.countup;
+                this.count = nc.bind(this);
+                console.log('count \'consoleListener.count()\'')
+                this.count();
+                console.count = nc.bind(this);
+                console.log('count \'console.count()\'');
+                console.count();
+
+
+            }
+
+            addMessage(method, args) {
+                this.appendMessage(args, method);
+                this.logs.push({ method, args });
+            }
+
+            static makeInstance() {
+                const consoleListener = document.createElement('console-listener');
+
+
+                consoleListener.appendChild(consoleListener.ui);
+                document.body.appendChild(consoleListener);
+
+
+
+
+
+
+
+
+
+
+                const myconsole = Object.entries(console);
+                const newconsole = Object.entries(consoleListener);
+                const combinedConsole = myconsole.concat(newconsole);
+
+                window.consolelogs = combinedConsole;
+
+                myconsole.forEach(([key, value]) => {
+                    window[key] = (args) => console[value];
+                });
+
+                return consoleListener;
+
+            }
+        }
+        customElements.define('console-listener', ConsoleListener);
+
+        window.onload = () => {
+            const consoleListener = ConsoleListener.makeInstance();
+            new ConsoleListener();
+            console.log('hi');
+            console.warn({ name: 'John', age: 30, city: 'New York' });
+            console.assert(true, 'This assertion should pass');
+            console.table([new ConsoleListener(), { name: 'John', age: 30, city: 'New York' }, { name: 'Jane', age: 25, city: 'London' }]);
+            console.log('Log message');
+            console.info('Info message');
+            console.warn('Warning message');
+            console.error('Error message');
+            console.debug(consoleListener, 'Debug message');
+            console.trace(console, 'Trace message');
+            console.count();
+            consoleListener.count();
+            ConsoleListener.time();
+            console.count();
+
+
+            console.dirxml();    // Fetch request
+            ConsoleListener.timeStamp();
+            fetch('https://api.example.com/data');
+        };
+    </script>
+
+
+</body>
+
+</html>
