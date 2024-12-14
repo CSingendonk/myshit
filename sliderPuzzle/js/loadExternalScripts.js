@@ -66,7 +66,7 @@
      */
     handleImport = (srcs = [], target = document.body) => {    
         document.fullscreenEnabled = true;
-           let paths = ['https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js'];
+           let paths = ['https://csingendonk.github.io/myshit/sliderPuzzle/elements_js/sliderpuzzle.js', 'https://csingendonk.github.io/myshit/sliderPuzzle/elements_js/popup.js', 'https://csingendonk.github.io/myshit/sliderPuzzle/elements_js/draggrip.js', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js'];
            if (srcs.length > 0) {
                paths = srcs;
            }
