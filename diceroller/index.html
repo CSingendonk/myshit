@@ -1,24 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Roller</title>
+    <title>Enhanced Interactive Dice Roller</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #dice-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        #canvas-container {
+            width: 800px;
+            height: 500px;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls select,
+        #controls input,
+        #controls button {
+            padding: 8px 15px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        #controls button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #controls button:hover {
+            background: #45a049;
+        }
+
+        .results-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #history {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
+
 <body>
-        <header id="header" class="header-main bar" role="banner">
-        <span class="header-main-title">
-            <h1>Dice</h1>
-        </span>
-        <span class="header-main-menu">
-            <button id="open-dice-dlg-btn">
-                Roller
-            </button>
-            <button id="help-button">Help</button>
-            <button id="about-button">About</button>
-        </span>
-    </header>
-    <dice-roller></dice-roller>
-    <script src="./dice.js"></script>
+
+    <div id="dice-container">
+        <div id="controls">
+            <div>
+                <label for="dice-type">Choose Dice Type: </label>
+                <select id="dice-type">
+                    <option value="d4">d4</option>
+                    <option value="d6">d6</option>
+                    <option value="d8">d8</option>
+                    <option value="d10">d10</option>
+                    <option value="d12">d12</option>
+                    <option value="d20">d20</option>
+                    <option value="d100">d100</option>
+                </select>
+            </div>
+            <div>
+                <label for="dice-count">Number of Dice: </label>
+                <input type="number" id="dice-count" value="1" min="1" max="10">
+            </div>
+            <div>
+                <label for="roll-speed">Roll Speed: </label>
+                <select id="roll-speed">
+                    <option value="slow">Slow</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="fast">Fast</option>
+                </select>
+            </div>
+            <div>
+                <label for="modifier">Modifier: </label>
+                <input type="number" id="modifier" value="0" step="1">
+            </div>
+            <div>
+                <button id="roll-btn">Roll Dice</button>
+                <button id="clear-btn">Clear All</button>
+                <button id="stats-btn">Show Stats</button>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="dice-canvas"></canvas>
+        </div>
+
+        <div class="results-container">
+            <h2>Current Roll: <span id="dice-results"></span></h2>
+            <h3>Total: <span id="total-result">0</span></h3>
+            <h3>With Modifier: <span id="modified-result">0</span></h3>
+            <div id="history">
+                <h3>Roll History</h3>
+                <div id="history-list"></div>
+            </div>
+        </div>
+
+        <div class="stats-container" id="stats-container" style="display: none;">
+            <h3>Statistics</h3>
+            <p>Average Roll: <span id="average-roll">0</span></p>
+            <p>Highest Roll: <span id="highest-roll">0</span></p>
+            <p>Lowest Roll: <span id="lowest-roll">0</span></p>
+            <p>Total Rolls: <span id="total-rolls">0</span></p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, world;
+        const diceResults = document.getElementById('dice-results');
+        const totalResult = document.getElementById('total-result');
+        const modifiedResult = document.getElementById('modified-result');
+        const historyList = document.getElementById('history-list');
+        const diceCanvas = document.getElementById('dice-canvas');
+        const diceTypeSelect = document.getElementById('dice-type');
+        const diceCountInput = document.getElementById('dice-count');
+        const rollSpeedSelect = document.getElementById('roll-speed');
+        const modifierInput = document.getElementById('modifier');
+        const statsContainer = document.getElementById('stats-container');
+
+        let rollHistory = [];
+        let statistics = {
+            totalRolls: 0,
+            highestRoll: 0,
+            lowestRoll: Infinity,
+            sum: 0
+        };
+
+        class PhysicsDie {
+            constructor(geometryType, color, physicsWorld, size = 1) {
+                this.geometryType = geometryType;
+                this.size = size;
+                this.color = color;
+                this.physicsWorld = physicsWorld;
+                this.createMesh();
+                this.createPhysicsBody();
+                this.isRolling = false;
+                this.rollStartTime = 0;
+                this.rollTimeout = this.getRollTimeout();
+            }
+
+            getRollTimeout() {
+                const speed = rollSpeedSelect.value;
+                switch (speed) {
+                    case 'slow': return 3000;
+                    case 'fast': return 1000;
+                    default: return 2000;
+                }
+            }
+
+            createMesh() {
+                let geometry;
+                switch (this.geometryType) {
+                    case 'd4': geometry = new THREE.TetrahedronGeometry(this.size); break;
+                    case 'd6': geometry = new THREE.BoxGeometry(this.size, this.size, this.size); break;
+                    case 'd8': geometry = new THREE.OctahedronGeometry(this.size); break;
+                    case 'd10': geometry = new THREE.ConeGeometry(this.size, this.size * 2, 10); break;
+                    case 'd12': geometry = new THREE.DodecahedronGeometry(this.size); break;
+                    case 'd20': geometry = new THREE.IcosahedronGeometry(this.size); break;
+                    case 'd100': geometry = new THREE.SphereGeometry(this.size, 32, 32); break;
+                    default: geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
+                }
+
+                const material = new THREE.MeshPhongMaterial({
+                    color: this.color,
+                    specular: 0x050505,
+                    shininess: 100,
+                    flatShading: true
+                });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+
+                // Add number labels
+                if (this.geometryType === 'd6') {
+                    this.addDiceLabels();
+                }
+            }
+
+            addDiceLabels() {
+                const loader = new THREE.TextureLoader();
+                const numbers = ['1', '2', '3', '4', '5', '6'];
+                numbers.forEach((num, index) => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, 128, 128);
+                    ctx.fillStyle = 'black';
+                    ctx.font = '64px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(num, 64, 64);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const material = new THREE.MeshBasicMaterial({ map: texture });
+                    const plane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(this.size * 0.8, this.size * 0.8),
+                        material
+                    );
+
+                    switch (index) {
+                        case 0: plane.position.y = this.size / 2 + 0.01; break; // top
+                        case 1: plane.position.y = -this.size / 2 - 0.01; plane.rotation.x = Math.PI; break; // bottom
+                        case 2: plane.position.x = this.size / 2 + 0.01; plane.rotation.y = Math.PI / 2; break; // right
+                        case 3: plane.position.x = -this.size / 2 - 0.01; plane.rotation.y = -Math.PI / 2; break; // left
+                        case 4: plane.position.z = this.size / 2 + 0.01; plane.rotation.x = Math.PI / 2; break; // front
+                        case 5: plane.position.z = -this.size / 2 - 0.01; plane.rotation.x = -Math.PI / 2; break; // back
+                    }
+
+                    this.mesh.add(plane);
+                });
+            }
+
+            createPhysicsBody() {
+                const shape = new CANNON.Box(new CANNON.Vec3(this.size/2, this.size/2, this.size/2));
+                this.body = new CANNON.Body({
+                    mass: 1,
+                    position: new CANNON.Vec3((Math.random() - 0.5) * 2, 5 + Math.random() * 2, (Math.random() - 0.5) * 2),
+                    angularDamping: 0.3,
+                    linearDamping: 0.3
+                });
+                this.body.addShape(shape);
+                this.physicsWorld.addBody(this.body);
+
+                // Apply initial forces
+                const force = 5;
+                this.body.applyImpulse(
+                    new CANNON.Vec3((Math.random() - 0.5) * force, force, (Math.random() - 0.5) * force),
+                    new CANNON.Vec3(0, 0, 0)
+                );
+                this.body.angularVelocity.set(
+                    Math.random() * 10,
+                    Math.random() * 10,
+                    Math.random() * 10
+                );
+            }
+
+            update() {
+                this.mesh.position.copy(this.body.position);
+                this.mesh.quaternion.copy(this.body.quaternion);
+
+                if (this.isRolling) {
+                    const currentTime = performance.now();
+                    if (currentTime - this.rollStartTime > this.rollTimeout &&
+                        this.body.velocity.length() < 0.1 &&
+                        this.body.angularVelocity.length() < 0.1) {
+                        this.isRolling = false;
+                        return this.finalizeRoll();
+                    }
+                }
+                return null;
+            }
+
+            roll() {
+                this.isRolling = true;
+                this.rollStartTime = performance.now();
+                const force = 5;
+                this.body.applyImpulse(
+                    new CANNON.Vec3((Math.random() - 0.5) * force, force, (Math.random() - 0.5) * force),
+                    new CANNON.Vec3(0, 0, 0)
+                );
+            }
+
+            getResult() {
+                switch (this.geometryType) {
+                    case 'd4': return Math.floor(Math.random() * 4) + 1;
+                    case 'd6': return Math.floor(Math.random() * 6) + 1;
+                    case 'd8': return Math.floor(Math.random() * 8) + 1;
+                    case 'd10': return Math.floor(Math.random() * 10) + 1;
+                    case 'd12': return Math.floor(Math.random() * 12) + 1;
+                    case 'd20': return Math.floor(Math.random() * 20) + 1;
+                    case 'd100': return Math.floor(Math.random() * 100) + 1;
+                    default: return 1;
+                }
+            }
+
+            finalizeRoll() {
+                const result = this.getResult();
+                this.lastResult = result;
+                return result;
+            }
+        }
+
+        class DiceScene {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0xf0f0f0);
+                this.camera = new THREE.PerspectiveCamera(75, diceCanvas.clientWidth / diceCanvas.clientHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: diceCanvas,
+                    antialias: true
+                });
+                this.renderer.setSize(diceCanvas.clientWidth, diceCanvas.clientHeight);
+                this.renderer.shadowMap.enabled = true;
+
+                this.world = new CANNON.World();
+                this.world.gravity.set(0, -9.82, 0);
+                this.world.broadphase = new CANNON.NaiveBroadphase();
+                this.world.solver.iterations = 20;
+
+                this.dice = [];
+                this.setupLighting();
+                this.createGround();
+                this.setupCamera();
+
+                this.animate();
+            }
+
+            setupLighting() {
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+            }
+
+            setupCamera() {
+                this.camera.position.set(0, 5, 10);
+                this.camera.lookAt(0, 0, 0);
+            }
+
+            createGround() {
+                // Three.js ground
+                const groundGeometry = new THREE.PlaneGeometry(20, 20);
+                const groundMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x808080,
+                    roughness: 0.4,
+                    metalness: 0.3
+                });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+
+                // Cannon.js ground
+                const groundShape = new CANNON.Plane();
+                const groundBody = new CANNON.Body({
+                    mass: 0,
+                    shape: groundShape
+                });
+                groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+                this.world.addBody(groundBody);
+            }
+
+            addDie(die) {
+                this.dice.push(die);
+                this.scene.add(die.mesh);
+                this.world.addBody(die.body);
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                this.world.step(1 / 60);
+
+                for (const die of this.dice) {
+                    die.mesh.position.copy(die.body.position);
+                    die.mesh.quaternion.copy(die.body.quaternion);
+                }
+
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            clearDice() {
+                for (const die of this.dice) {
+                    this.scene.remove(die.mesh);
+                    this.world.removeBody(die.body);
+                }
+                this.dice = [];
+            }
+        }
+        let diceScene;
+        let activeRolls = 0;
+
+        function initScene() {
+            diceScene = new DiceScene();
+        }
+
+        function rollDice() {
+            const diceType = diceTypeSelect.value;
+            const diceCount = parseInt(diceCountInput.value);
+            const modifier = parseInt(modifierInput.value);
+
+            if (diceCount < 1 || diceCount > 10) {
+                alert('Please select between 1 and 10 dice');
+                return;
+            }
+
+            diceScene.clearDice();
+            activeRolls = diceCount;
+            const results = [];
+
+            for (let i = 0; i < diceCount; i++) {
+                const die = new PhysicsDie(
+                    diceType,
+                    new THREE.Color(Math.random() * 0xffffff),
+                    diceScene.world
+                );
+                diceScene.addDie(die);
+                die.roll();
+            }
+
+            checkRollResults();
+        }
+
+        function checkRollResults() {
+            if (activeRolls <= 0) return;
+
+            const results = [];
+            let allFinished = true;
+
+            for (const die of diceScene.dice) {
+                const result = die.update();
+                if (result !== null) {
+                    results.push(result);
+                } else {
+                    allFinished = false;
+                }
+            }
+
+            if (allFinished) {
+                const modifier = parseInt(modifierInput.value);
+                const total = results.reduce((a, b) => a + b, 0);
+
+                diceResults.textContent = results.join(', ');
+                totalResult.textContent = total;
+                modifiedResult.textContent = total + modifier;
+
+                // Update history
+                const historyEntry = document.createElement('div');
+                historyEntry.className = 'history-item';
+                historyEntry.textContent = `${diceTypeSelect.value} x${results.length}: [${results.join(', ')}] = ${total} (${total + modifier} with modifier)`;
+                historyList.insertBefore(historyEntry, historyList.firstChild);
+
+                // Update statistics
+                updateStatistics(total);
+
+                activeRolls = 0;
+            } else {
+                requestAnimationFrame(checkRollResults);
+            }
+        }
+
+        function updateStatistics(total) {
+            statistics.totalRolls++;
+            statistics.sum += total;
+            statistics.highestRoll = Math.max(statistics.highestRoll, total);
+            statistics.lowestRoll = Math.min(statistics.lowestRoll, total);
+
+            document.getElementById('average-roll').textContent = (statistics.sum / statistics.totalRolls).toFixed(2);
+            document.getElementById('highest-roll').textContent = statistics.highestRoll;
+            document.getElementById('lowest-roll').textContent = statistics.lowestRoll === Infinity ? 0 : statistics.lowestRoll;
+            document.getElementById('total-rolls').textContent = statistics.totalRolls;
+        }
+
+        function clearAll() {
+            diceScene.clearDice();
+            historyList.innerHTML = '';
+            diceResults.textContent = '';
+            totalResult.textContent = '0';
+            modifiedResult.textContent = '0';
+            statistics = {
+                totalRolls: 0,
+                highestRoll: 0,
+                lowestRoll: Infinity,
+                sum: 0
+            };
+            updateStatistics(0);
+        }
+
+        function toggleStats() {
+            statsContainer.style.display = statsContainer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Event Listeners
+        document.getElementById('roll-btn').addEventListener('click', rollDice);
+        document.getElementById('clear-btn').addEventListener('click', clearAll);
+        document.getElementById('stats-btn').addEventListener('click', toggleStats);
+
+        // Initialize the scene
+        window.addEventListener('load', initScene);
+    </script>
 </body>
+
 </html>
