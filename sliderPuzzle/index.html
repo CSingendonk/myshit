@@ -17,6 +17,9 @@
             <button id="open-puzzle-dlg-btn">
                 Puzzle
             </button>
+            <button id="open-dice-btn">
+                Dice
+            </button>
             <button id="help-button">Help</button>
             <button id="about-button">About</button>
         </span>
@@ -33,6 +36,14 @@
     const helpButton = document.getElementById('help-button');
     const aboutButton = document.getElementById('about-button');
     const openPuzzleDlgBtn = document.getElementById('open-puzzle-dlg-btn');
+    const openDiceBtn = document.getElementById('open-dice-btn');
+
+    openDiceBtn.addEventListener('click', () => {
+        const a = openDiceBtn;
+        const b = document.createElement('iframe');
+        b.src = 'https://csingendonk.github.io/htmlpanels/diceroller/index.html';
+        document.body.appendChild(b);
+    })
     
     // Add event listeners to the buttons
     openPuzzleDlgBtn.addEventListener('click', (event) => {
