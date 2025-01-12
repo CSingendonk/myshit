@@ -1,17 +1,15 @@
-  <!DOCTYPE html>
-  <html lang="en">
-
+<html>
   <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta charset="UTF-8">
-      <title>Slider Puzzle</title>
+      <title>CS 2025</title>
       <link rel="stylesheet" href="https://csingendonk.github.io/htmlpanels/sliderPuzzle/css/style.css">
   </head>
-
   <body>
       <header id="header" class="header-main bar" role="banner">
           <span class="header-main-title">
-              <h1>Slider Puzzle</h1>
+              <CC:ie=<fuck>
+                <fuck>fuck</fuck>
+              </fuck>
+              </Cc:noie>
           </span>
           <span class="header-main-menu">
               <button id="open-puzzle-dlg-btn">Puzzle</button>
@@ -92,13 +90,92 @@
       });
 
       openPuzzleDlgBtn.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+          iframe.style.width = '98vw';
+          iframe.style.height = '98vh';
+          iframe.style.border = '2px groove #3f0';
+          iframe.style.position = 'absolute';
+          iframe.style.overflow = 'hidden';
+          iframe.style.flexShrink = '1';
+          iframe.style.resize = 'both';
+          iframe.style.top = '50%';
+          iframe.style.left = '50%';
+          iframe.style.transform = 'translate(-50%, -50%)';
+          iframe.style.display = 'block';
+          iframe.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+          iframe.style.borderRadius = '8px';
+          
+          const puzzleElement = document.createElement('slider-puzzle') || document.getElementsByTagName('slider-puzzle')[0];
+          puzzleElement.style.width = '100%';
+          puzzleElement.style.height = '100%';
+          puzzleElement.style.border = 'none';
+          puzzleElement.style.position = 'relative';
+          puzzleElement.style.display = 'block';
+          puzzleElement.style.overflow = 'hidden';
+          puzzleElement.style.flexShrink = '1';
+          puzzleElement.style.resize = 'both';
+          puzzleElement.style.margin = 'auto';
+          puzzleElement.style.backgroundColor = '#f5f5f5';
+          puzzleElement.style.padding = '20px';
+          puzzleElement.style.borderRadius = '8px';
+          puzzleElement.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.1)';
+
+          const container = document.createElement('div');
+          container.style.resize = 'both';
+          container.style.position = 'absolute';
+          container.style.display = 'flex';
+          container.style.flexShrink = '1';
+          container.style.top = '50%';
+          container.style.left = '50%';
+          container.style.transform = 'translate(-50%, -50%)';
+          container.style.width = '90%';
+          container.style.height = '90%';
+          container.style.maxWidth = '800px';
+          container.style.maxHeight = '600px';
+          container.style.backgroundColor = 'white';
+          container.style.borderRadius = '12px';
+          container.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+
+          const closeButton = document.createElement('button');
+          closeButton.innerText = '❌';
+          closeButton.style.zIndex = Number.MAX_SAFE_INTEGER;
+          closeButton.style.backgroundColor = '#ff000099';
+          closeButton.title = 'Close Slider Puzzle';
+          closeButton.style.display = 'inline-flex';
+          closeButton.style.position = 'absolute';
+          closeButton.style.top = '10px';
+          closeButton.style.right = '10px';
+          closeButton.style.border = 'none';
+          closeButton.style.borderRadius = '50%';
+          closeButton.style.padding = '8px';
+          closeButton.style.cursor = 'pointer';
+          closeButton.style.transition = 'all 0.2s ease';
+
+          const dragGrip = document.createElement('drag-grip');
+          dragGrip.style.cursor = 'move';
+
+          document.scripts.forEach(s => {
+            const s2 = document.createElement('script');
+            s2.src = s.src;
+            container.appendChild(s2);
+          })
+          container.appendChild(closeButton);
+          container.appendChild(dragGrip);
+          container.appendChild(puzzleElement);
+          iframe.srcdoc = container.innerHTML;
+          closeButton.addEventListener('click', () => {
+              iframe.remove();
+          });
+          document.body.appendChild(iframe);
+      });
+      openPuzzleDlgBtn.addEventListener('click', () => {
           const existingPuzzle = Array.from(document.body.popups).find(p => p.title === 'Puzzle');
           if (existingPuzzle) {
               existingPuzzle.show();
-              return;
+              return false;
           }
           const puzzleElement = document.createElement('slider-puzzle');
-          const popup = new PopupBox('Puzzle', [puzzleElement], ['option']);
+          const popup = new PopupBox('SP', [puzzleElement], []);
           popup.show();
       });
 
