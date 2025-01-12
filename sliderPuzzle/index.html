@@ -22,10 +22,6 @@
       </header>
       <main id="main-content"></main>
       <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/js/loadExternalScripts.js"></script>
-      <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/popup.js"></script>
-      <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/sliderpuzzle.js"></script>
-      <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/elements_js/draggrip.js"></script>
-    
       <script id="ui-interaction-inititializer-script">
       const helpButton = document.getElementById('help-button');
       const aboutButton = document.getElementById('about-button');
@@ -102,8 +98,7 @@
               return;
           }
           const puzzleElement = document.createElement('slider-puzzle');
-          const popup = new PopupBox('Puzzle', [puzzleElement], 'option');
-          document.body.popups.push(popup);
+          const popup = new PopupBox('Puzzle', [puzzleElement], ['option']);
           popup.show();
       });
 
