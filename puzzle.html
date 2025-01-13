@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Slider Puzzle</title>
+        <link rel="stylesheet" href="https://csingendonk.github.io/htmlpanels/sliderPuzzle/css/style.css">
+        <style>
+            body, html {
+                background: #00000000;
+                display: block;
+                min-width: min-content;
+                min-height: min-content;
+                height: max-content;
+                width: 100%;
+                margin: 0px;
+                padding: 0px;
+                overflow: hidden;
+            }
+
+            :root {
+                display: flex; 
+                box-sizing: ;
+            }
+            .standby, .standby *, .standby > * * {
+                opacity: 0.1;
+                transform: scale(0.1);
+                transition: all 1s ease-in-out;
+            }
+            .started {
+                transform: scale(1);
+                transition: all 1s ease-in-out;
+            }
+            slider-puzzle, .started, .started *, .started > * * {
+                opacity: 1;
+                transition: all 1s ease-in-out;
+                margin: 5% auto;
+                padding: initial;
+                width: 100%;
+                height: 100%;
+            }
+            .hidden {
+                opacity: 0;
+                transform: scale(0);
+                margin: 0px;
+                padding: 0px;
+            }
+
+
+             
+        </style>
+    </head>
+    <body>
+        <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/js/loadExternalScripts.js"></script>
+            <div>
+                <slider-puzzle id="puzzle" class="standby"></slider-puzzle>
+            </div>
+            <script src="./startpuzzle.js"></script>
+    </body>
+</html>
