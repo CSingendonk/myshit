@@ -47,7 +47,7 @@ class SliderPuzzle extends HTMLElement {
                     `https://picsum.photos/600/600/?random=${Math.random()}`, this.defaultImgUrl
                 ]
             };
-            let storedImages = localStorage.getItem('userImages');
+            let storedImages = null; //localStorage.getItem('userImages');
             if (storedImages) {
                 this.userImages = JSON.parse(storedImages);
             }
@@ -775,10 +775,10 @@ class SliderPuzzle extends HTMLElement {
                 moveCount: this.puzzleState.moveCount,
                 elapsedTime: this.puzzleState.time
             };
-            localStorage.setItem('sliderpuzzle_gamedata', JSON.stringify(gameData));
+            //localStorage.setItem('sliderpuzzle_gamedata', JSON.stringify(gameData));
         };
         this.loadGameData = () => {
-            const savedData = localStorage.getItem('sliderpuzzle_gamedata');
+            const savedData = null; // localStorage.getItem('sliderpuzzle_gamedata');
             if (savedData) {
                 const gameData = JSON.parse(savedData);
                 this.puzzleState = gameData.puzzleState;
@@ -1356,14 +1356,14 @@ class SliderPuzzle extends HTMLElement {
                 break;
             case 's':
                 if (event.altKey) {
-                    localStorage.setItem('puzzleState', JSON.stringify(this.puzzleState));
+                    // localStorage.setItem('puzzleState', JSON.stringify(this.puzzleState));
                     if (localStorage.getItem('sliderpuzzleHistory')) {
                         let history = JSON.parse(localStorage.getItem('sliderpuzzleHistory'));
                         this.history = !history || history.length === 0 ? this.history : [...history, ...this.history];
                         history.push(this.puzzleState);
-                        localStorage.setItem('sliderpuzzleHistory', JSON.stringify(history));
+                      //  localStorage.setItem('sliderpuzzleHistory', JSON.stringify(history));
                     } else {
-                        localStorage.setItem('sliderpuzzleHistory', JSON.stringify([this.puzzleState]));
+                       // localStorage.setItem('sliderpuzzleHistory', JSON.stringify([this.puzzleState]));
                     }
                     break;
                 }
@@ -1577,7 +1577,7 @@ class SliderPuzzle extends HTMLElement {
           max-width: 600px;
       `;
 
-      let history = JSON.parse(localStorage.getItem('sliderpuzzleHistory'));
+      let history = null; //JSON.parse(localStorage.getItem('sliderpuzzleHistory'));
       if (history) {
           const historyGrid = document.createElement('div');
           historyGrid.style.cssText = `
