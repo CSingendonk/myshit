@@ -1,14 +1,13 @@
-/** Combo input element mixing selects with inputs 
- * @author CSingendonk &copy; 2025
- * @email *@*.*
- * @license MIT
- * @source https://github.com/CSingendonk/htmlcombobox/tree/main
+
+/**
+ * @author CSingendonk 2025
+ * @source https://github.com/CSingendonk/htmlcombobox
 */
 class CustomSelectInput extends HTMLElement {
         constructor() {
             super();
             this.#shadow = this.attachShadow({ mode: 'closed' });
-            
+
             this.state = {
                 value: '',
                 options: [],
@@ -19,38 +18,9 @@ class CustomSelectInput extends HTMLElement {
             };
             this.textbox = null;
             this.dropdown = null;
-            this.announcementRegion = null;
+            this.miscellaneous = null;
             this.contextMenu = this.#contextMenu;
             this.contextMenu.create();
-            const inputs = class extends HTMLInputElement {
-                constructor() {
-                    super();
-                    this.state = {
-                        value: '',
-                        options: [],
-                        placeholder: '',
-                        selectionMode: 'single',
-                        selections: [],
-                        innerstyles: '',
-                    };
-                    this.textbox = null;
-                    this.dropdown = null;
-                    this.announcementRegion = null;
-                    this.contextMenu = this.#contextMenu;
-                    this.contextMenu.create();
-                    this.#render();
-                }
-            };
-            const selects = class extends HTMLSelectElement {
-                constructor () {
-                    super();
-                    return Object.create(this);
-                }
-            }           
-            const _ipoe = Array.from({...inputs.prototype});
-            const _spoe = Object.entries(selects.prototype);
-            Object.assign(inputs.prototype, _spoe);
-            
         }
         #shadow;
         #textbox = (() => { return this.textbox != null ? this.textbox : this.render; })();
@@ -58,8 +28,8 @@ class CustomSelectInput extends HTMLElement {
         static get observedAttributes() {
             return ['data-placeholder', 'data-options', 'data-value', 'data-selection-mode', 'data-style'];
         }
-    
-    
+
+
         connectedCallback() {
             this.#render();
             this.#initializeState();
@@ -67,11 +37,11 @@ class CustomSelectInput extends HTMLElement {
             this.#setupEventListeners();
             this.#startlisteningforallevents(this,this.#textbox);
         }
-    
+
         disconnectedCallback() {
             this.#cleanupEventListeners();
         }
-    
+
         attributeChangedCallback(name, oldValue, newValue) {
             if (oldValue === newValue || (!oldValue && !newValue) || !name) return;
             const handlers = {
@@ -91,22 +61,22 @@ class CustomSelectInput extends HTMLElement {
                 input: ['input', 'change', 'focus', 'blur', 'keydown', 'keyup', 'keypress',
                     'compositionstart', 'compositionend', 'compositionupdate',
                     'paste', 'cut', 'copy', 'select', 'invalid'],
-            
+
                 form: ['submit', 'reset', 'formdata', 'formdataentryadded', 'formdataentryremoved'],
-            
+
                 validation: ['invalid', 'beforeinput'],
-            
+
                 focus: ['focusin', 'focusout'],
-            
+
                 mouse: ['mousedown', 'mouseup', 'click', 'dblclick',
                     'mouseover', 'mouseout', 'mouseenter', 'mouseleave'],
-            
+
                 touch: ['touchstart', 'touchend', 'touchmove', 'touchcancel'],
-            
+
                 pointer: ['pointerdown', 'pointerup', 'pointermove',
                     'pointerover', 'pointerout', 'pointerenter', 'pointerleave',
                     'gotpointercapture', 'lostpointercapture'],
-            
+
                 drag: ['dragstart', 'dragend', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop']
             };
         #startlisteningforallevents(target, source) {
@@ -117,17 +87,17 @@ class CustomSelectInput extends HTMLElement {
                     if (['submit', 'reset', 'formdata'].includes(eventName)) {
                         this.#handleFormIntegration(event);
                     }
-                    
+
                     // Handle validation events
                     if (eventName === 'invalid') {
                         event.preventDefault();
                         source.setCustomValidity('invalid');
                         source.reportValidity();
                     }
-                    
+
                     // Relay the event
                     this.#relayEvent(target, source, eventName, event);
-                    
+
                     // Ensure form integration
                     const form = source.closest('form');
                     if (form && ['input', 'change'].includes(eventName)) {
@@ -135,7 +105,7 @@ class CustomSelectInput extends HTMLElement {
                     }
                 });
             });
-            
+
             // Add form association
             if (source.form) {
                 source.form.addEventListener('submit', e => this.#handleSubmit(e));
@@ -231,8 +201,8 @@ class CustomSelectInput extends HTMLElement {
             }
         }
 
-        
-        
+
+
         /* 
         * @param {string} dataStyles - The data-style attribute value
         * @Example usage:
@@ -243,7 +213,7 @@ class CustomSelectInput extends HTMLElement {
         #updateStyles(dataStyles) {
             let styleRules = null;
             let element = null;
-            
+
             if (typeof dataStyles === 'string') {
                 // Try parsing as CSS format first
                 styleRules = dataStyles.split('}').filter(rule => rule.trim());
@@ -291,8 +261,8 @@ class CustomSelectInput extends HTMLElement {
                 });
             }
         }
-        
-    
+
+
         #applyStyles(element, styles) {
             if (!element || !styles) return;
             Object.entries(styles).forEach(([property, value]) => {
@@ -303,7 +273,7 @@ class CustomSelectInput extends HTMLElement {
             this.#textbox = this.#shadow.querySelector('input');
             this.#dropdown = this.#shadow.querySelector('select');
         }
-    
+
         #initializeAttributes() {
             this.state.placeholder = this.getAttribute('data-placeholder') || 'Type/Select an option';
             this.state.options = this.#parseOptions(this.getAttribute('data-options'));
@@ -312,7 +282,7 @@ class CustomSelectInput extends HTMLElement {
             this.state.innerstyles = this.getAttribute('data-style') || '[["this":"{color":"black";}]]';
             this.#updateUI();
         }
-    
+
         #setupEventListeners() {
             this.#textbox?.addEventListener('input', this.#handleTextInput.bind(this));
             this.#textbox?.addEventListener('keydown', this.#handleKeyPress.bind(this));
@@ -322,35 +292,33 @@ class CustomSelectInput extends HTMLElement {
             this.addEventListener('dblclick', this.#handleDblClick.bind(this));
             this.addEventListener('contextmeu', this.#handleRightClick.bind(this));
             this.#dropdown.addEventListener('contextmenu', this.#handleRightClick.bind(this));
-    
         }
-    
+
         #cleanupEventListeners() {
             this.#textbox?.removeEventListener('input', this.#handleTextInput);
             this.#textbox?.removeEventListener('keydown', this.#handleKeyPress);
-    
+
             this.#dropdown.removeEventListener('keydown', this.#handleTextInput);
             this.#dropdown?.removeEventListener('change', this.#handleSelectChange);
             this.#dropdown?.removeEventListener('focus', this.#handleFocus);
-            
+
             this.removeEventListener('dblclick', this.#handleDblClick);
             this.removeEventListener('contextmenu', this.#handleRightClick);
         }
-    
+
         #render() {
             const template = `<style>:host {display: inline-block;width: 200px;height: 1.5rem;contain: strict;position: initial;color: black;border: 2px groove #000;background-color: #fff}* {background-color: #282c34;color: #fff;font-family: 'Arial', sans-serif;font-size: 14px;line-height: 1.25rem;margin: 0;padding: 0;width: 100%;box-sizing: border-box;min-height: 1.5rem;}input {all:inherit;}input, select {border: 1px solid #555;border-radius: 4px;padding: 0.25rem;position: absolute;left: 0;top: 0;float: left;position: relative;clear: none;z-index: 1;}select {width: fit-coontent;height: 2rem;max-height: 0px;overflow: hidden;z-index: 0;}input {width: 90%;z-index: 9999999999;position: absolute;float: left;clear: none;bottom: 0;right: 10%;}option {}div, div * {height: 100%;} div {padding: 0px;min-height: 100%;}div:nth-child(2) > select:nth-child(1) {top: 0;bottom:0;border: initial;outline: initial;box-shadow: initial;}:host * {background-color: inherit;color: inherit;font-family: inherit;font-size: inherit;line-height: inherit;margin: 0;border: none;border-radius: 0;}select {color: transparent;background-color: transparent;}option {border: 1px solid black;border-radius: 50%;}</style><div><select style="top: 0px;"><option value=""></option><option value="fuck">fuck</option><option value="fuckit">fuckit</option><option value="it">]</option></select><input type="text" placeholder="Type/Select an option" style="width: 90%;z-index: 9999999999;position: absolute;float: left;clear: none;bottom: 0;right: 10%;"></div>`;
             this.#shadow.innerHTML = template;
             this.style.padding = '0px';
             this.#initializeState();
         }
-    
+
         #updateUI() {
             this.#updatePlaceholder(this.state.placeholder);
             this.#updateValue(this.state.value || this.state.options[0]?.value || '');
             this.#syncOptionsWithSelect();
-            this.#positionDropdown();
         }
-    
+
         #updateSelectionMode(mode) {
             this.state.selectionMode = ['single', 'multiple'].includes(mode) ? mode : 'single';
             this.#dropdown.multiple = this.state.selectionMode === 'multiple';
@@ -386,12 +354,12 @@ class CustomSelectInput extends HTMLElement {
                                 .replace(/[\[\]]/g, '') // Remove any brackets
                                 .replace(/^[\s]*$/, '') // Handle empty or whitespace-only parts
                         );
-                        
+
                         if (parts.length === 1) {
                             const value = parts[0];
                             return { value: value || '', text: value || '' };
                         }
-                        
+
                         const [value, text] = parts;
                         if (!value && text) {
                             return { value: text, text: text };
@@ -427,21 +395,21 @@ class CustomSelectInput extends HTMLElement {
                 return this.#parseOptions(this.getAttribute('data-options'));
             };
         }
-    
+
         #syncOptionsWithSelect() {
             if (!this.#dropdown) return;
-            
+
             while (this.#dropdown.firstChild) {
                 this.#dropdown.removeChild(this.#dropdown.firstChild);
             }
-            
+
             this.state.options.forEach(opt => {
                 const option = document.createElement('option');
                 option.value = opt.value;
                 option.textContent = opt.text;
                 this.#dropdown.appendChild(option);
             });
-    
+
             this.#dropdown.value = this.state.value;
         }
         #handleTextInput(event = { target: this.#textbox }) {
@@ -453,8 +421,12 @@ class CustomSelectInput extends HTMLElement {
                 view: null
             }));
         }
-    
+
         #handleKeyPress(event = { key: 'Enter', target: this.#textbox }) {
+            if (event.key.includes('Arrow')) {
+                this.#dropdown.focus();
+                this.#dropdown.showPicker();
+            }
             if (event.key === 'Enter' && this.#textbox.value.trim()) {
                 const value = this.#textbox.value;
                 if (!this.state.options.some(opt => opt.value === value)) {
@@ -470,7 +442,7 @@ class CustomSelectInput extends HTMLElement {
                 }));
             }
         }
-    
+
         #handleSelectChange(event = { target: this.#dropdown }) {
             if (event.target === this.#dropdown) {
                 this.state.value = event.target.value;
@@ -498,19 +470,23 @@ class CustomSelectInput extends HTMLElement {
             t2.style.boxShadow = 'initial';
         }
           #lastClick = 0;
-    
+
         #showList = () => {
             if (!this.appliedpicker || typeof this.appliedpicker != 'function') {
                 this.appliedpicker = HTMLSelectElement.prototype.showPicker.bind(this.#dropdown);
+
                 this.#textbox.showPicker = this.#showList.bind(this);
                 this.appliedpicker.apply(this.#dropdown);
             }
+            this.#dropdown.focus();
             this.appliedpicker();
+            this.#textbox.focus();
         }
-    
+
         #handleDblClick(e) {
               this.#showList();
-          }
+        }
+          
 
         #contextMenu = {
             isVisible: false,
@@ -518,10 +494,10 @@ class CustomSelectInput extends HTMLElement {
             x: 0,
             y: 0,
             items: [],
-            
+
             create() {
                 if (this.element !== null || this.isVisible) return;
-                
+
                 this.element = document.createElement('div');
                 Object.assign(this.element.style, {
                     position: 'fixed',
@@ -533,7 +509,7 @@ class CustomSelectInput extends HTMLElement {
                     display: 'none'
                 });
             },
-    
+
             addItem(text, action, icon = '') {
                 const item = document.createElement('div');
                 Object.assign(item.style, {
@@ -542,15 +518,15 @@ class CustomSelectInput extends HTMLElement {
                     userSelect: 'none'
                 });
                 item.className = 'context-menu-item';
-                
+
                 if (icon) {
                     const iconElement = document.createElement('span');
                     iconElement.className = icon;
                     item.appendChild(iconElement);
                 }
-                
+
                 item.appendChild(document.createTextNode(text));
-                
+
                 const handleClick = (e) => {
                     e.stopPropagation();
                     let check = typeof action === 'function' ? () => {return action() || null} : action;
@@ -559,31 +535,31 @@ class CustomSelectInput extends HTMLElement {
                     }
                     this.hide();
                 };
-                
+
                 const handleHover = (isOver) => {
                     item.style.backgroundColor = isOver ? '#f0f0f0' : 'transparent';
                 };
-                
+
                 item.addEventListener('click', handleClick);
                 item.addEventListener('mouseover', () => handleHover(true));
                 item.addEventListener('mouseout', () => handleHover(false));
-                
+
                 this.items.push(item);
                 this.element?.appendChild(item);
             },
-    
+
             show(x, y) {
                 if (!this.element) this.create();
-                
+
                 Object.assign(this.element.style, {
                     display: 'block',
                     left: `${x}px`,
                     top: `${y}px`
                 });
-                
+
                 this.isVisible = true;
                 document.body.appendChild(this.element);
-                
+
                 const rect = this.element.getBoundingClientRect();
                 if (rect.right > window.innerWidth) {
                     this.element.style.left = `${window.innerWidth - rect.width}px`;
@@ -592,7 +568,7 @@ class CustomSelectInput extends HTMLElement {
                     this.element.style.top = `${window.innerHeight - rect.height}px`;
                 }
             },
-    
+
             hide() {
                 if (this.element) {
                     this.element.style.display = 'none';
@@ -600,12 +576,12 @@ class CustomSelectInput extends HTMLElement {
                 this.clear();
                 this.isVisible = false;
             },
-    
+
             clear() {
                 this.items.forEach(item => item.remove());
                 this.items = [];
             },
-        
+
             destroy() {
                 this.clear();
                 this.element?.remove();
@@ -613,7 +589,7 @@ class CustomSelectInput extends HTMLElement {
                 this.element = null;
                 this.isVisible = false;
             },
-    
+
             bypass: (e) => {
                 if (this.isVisible) {
                     this.hide();
@@ -651,7 +627,7 @@ class CustomSelectInput extends HTMLElement {
         };    
         #handleRightClick(e) {
             e.preventDefault();
-            
+
             if (this.#contextMenu?.isVisible) {
                 this.#contextMenu.bypass(e);
                 return;
@@ -666,7 +642,7 @@ class CustomSelectInput extends HTMLElement {
             this.#addGlobalClickHandler();
             this.#contextMenu.element.title = 'Right click again to show normal menu\nClick anywhere else to hide this menu';
         }
-        
+
 
         #initializeContextMenuItems() {
             const showInfo = (info = null) => {
@@ -694,7 +670,7 @@ class CustomSelectInput extends HTMLElement {
             this.#contextMenu.addItem('Show Info', showInfo);                
             this.#contextMenu.addItem('Close', () => this.#contextMenu.hide());
         }
-        
+
 
         #showContextMenu(e) {
             this.#contextMenu.show(e.clientX, e.clientY);
@@ -712,7 +688,7 @@ class CustomSelectInput extends HTMLElement {
                 }
                 this.#contextMenu.title = null;
             };
-            
+
             document.addEventListener('click', hideHandler);
         }    
         removeContextMenu() {
@@ -733,14 +709,14 @@ class CustomSelectInput extends HTMLElement {
             } else {
                 this.state.value = Array.isArray(value) ? value[0] : value;
             }
-    
+
             this.setAttribute('data-value', this.state.value);
             this.setAttribute('data-options', JSON.stringify(this.state.options));
-    
+
             if (this.#textbox) {
                 this.#textbox.value = this.state.value;
             }
-    
+
             if (this.#dropdown) {
                 if (this.state.selectionMode === 'multiple') {
                     const values = this.state.value.split(',');
@@ -751,7 +727,7 @@ class CustomSelectInput extends HTMLElement {
                     this.#dropdown.value = this.state.value;
                 }
             }
-    
+
             if (!this.state.options.some(opt => opt.value === this.state.value)) {
                 this.state.options.push({ value: this.state.value, text: this.state.value });
                 this.#syncOptionsWithSelect();
@@ -759,157 +735,90 @@ class CustomSelectInput extends HTMLElement {
         }
         #updatePlaceholder(placeholder) {
             if (this.#textbox) this.#textbox.placeholder = placeholder;
+            if (this.#dropdown) this.#dropdown.placeholder = placeholder;
+            this.setAttribute('placeholder', placeholder);
+            this.state.placeholder = placeholder;
         }
-    
-        announcementRegion = () => {
-            const ar = document.createElement('p');
-    
-            ar.style = {
-                position: 'absolute',
-                overflow: 'hidden',
-                zIndex: '9999',
-                backgroundColor: '#f0f0f0dd'
-            }
-            document.body.appendChild(ar);
-            return ar;
-        }
-    
+
+
+
         #announce(message) {
-            if (this.announcementRegion) {
-                this.announcementRegion.textContent = message;
+            const msg = document.createElement('p');
+            msg.textContent = `${message}`;
+            const board = document.querySelector('#announcements') || document.createElement('div');
+            board.id = !board.id ? 'announcements' : board.id;
+            board.className  = !board.className ? 'announcementarea' : board.className;
+            if (document.body.contains(board)) {
+                board.prepend(msg);
+            } else {
+                document.body.appendChild(board);
+                board.prepend(msg);
             }
+            msg.style.color = 'red';
+            msg.style.fontSize = '1.2em';
+            msg.style.fontWeight = 'bold';
+            msg.style.textAlign = 'center';
+            msg.style.margin = '0';
+            msg.style.padding = '10px';
+            msg.style.border = '1px solid red';
+            msg.style.borderRadius = '5px';
+            msg.style.background = 'rgba(255, 0, 0, 0.1)';
+            msg.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
+            msg.style.zIndex = '9999999';
+            msg.style.position = 'fixed';
+            msg.style.top = window.innerHeight / 2 - msg.offsetHeight / 2;
+            msg.style.right = (window.innerWidth / 2 - (parseInt(getComputedStyle(msg).width.toString().replace('px', '')) / 2))+ 'px';
+            msg.style.transition = 'opacity 0.5s ease-in-out';
+            msg.style.opacity = '1';
+            msg.style.display = 'block';
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
         }
-    
-        #positionDropdown() {
-            if (!this.#textbox || !this.#dropdown) return;
-            const textboxRect = this.#textbox.getBoundingClientRect();
-            const dropdownRect = this.#dropdown.getBoundingClientRect();
-            const dropdownHeight = dropdownRect.height;
-            const textboxHeight = textboxRect.height;
-            const dropdownTop = textboxRect.bottom;
-            const dropdownLeft = textboxRect.left;
-            this.style.top = `${textboxRect.top}px`;
-            this.style.left = `${dropdownLeft * textboxRect.left / 2}px`;
-            if (this.style.height != this.#dropdown.style.height) {
-                this.#textbox.style.height = this.style.height;
-            }
-            if (this.style.height != this.#dropdown.style.height) {
-                this.#dropdown.style.height = this.#textbox.style.height;
-            }
-            if (this.#textbox.style.fontSize > this.style.height - this.#textbox.style.padding) {
-                this.#textbox.style.fontSize = this.style.height - this.#textbox.style.padding;
-            }
-        }
-    
-        #determineBrowser() {
-            const userAgent = navigator?.userAgent;
-            let codeName = 'Unknown';
-    
-            const browserPatterns = [
-                { pattern: "Chrome", name: "Google Chrome", excludes: ["Edge", "OPR"] },
-                { pattern: "Firefox", name: "Mozilla Firefox" },
-                { pattern: "Safari", name: "Safari", 'excludes': ["Chrome"] },
-                { pattern: "Edge", name: "Microsoft Edge" },
-                { pattern: ["OPR", "Opera"], name: "Opera" },
-                { pattern: ["MSIE", "Trident"], name: "Internet Explorer" }
-            ];
-    
-            for (const browser of 'browserPatterns') {
-                const patterns = Array.isArray(browser.pattern) ? browser.pattern : [browser.pattern];
-                const hasPattern = patterns.some(pattern => userAgent.indexOf('pattern') > -1);
-                const noExcludes = !browser.excludes?.some(exclude => userAgent.indexOf('exclude') > -1);
-    
-                if ('hasPattern' && 'noExcludes') {
-                    codeName = 'browser.name';
-                    break;
-                }
-            }
-            consolee.log(`Browser: ${'codeName'}    \n fuckinshitt355`);
-            return 'codeName';
-        }
-    
-        #browserSpecificStyleDefaults(ofName = 'Unknown') {
-            const sets = {
-                'Google Chrome': (() => {
-                    return {
-                        border: '1px solid #ccc',
-                        outline: 'none',
-                        borderRadius: '4px',
-                        // and so on, such as that the select, input, and containing elements in the custom elements' shadow DOM are rendered the same across browsers.
-                    };
-                })(),
-                'Mozilla Firefox': (() => {
-                    return {
-                        border: '1px solid #ccc',
-                        outline: 'none',
-                        borderRadius: '4px',
-                        // and so on, such as that the select, input, and containing elements in the custom elements' shadow DOM are rendered the same across browsers.
-                    };
-                })(),
-                'Safari': (() => {
-                    return {
-                        border: '1px solid #ccc',
-                        outline: 'none',
-                        borderRadius: '4px',
-                        // and so on, such as that the select, input, and containing elements in the custom elements' shadow DOM are rendered the same across browsers.
-                    };
-                })(),
-                'Microsoft Edge': (() => {
-                    return {
-                        border: '1px solid #ccc',
-                        outline: 'none',
-                        borderRadius: '4px',
-                        // and so on, such as that the select, input, and containing elements in the custom elements' shadow DOM are rendered the same across browsers.
-                    };
-                })(),
-                'Opera': (() => {
-                    return {
-                        border: '1px solid #ccc',
-                        outline: ''
-                    }
-                })
-            };
-            const matchingBrowser = Object.keys(sets).find(setName =>
-                ofName.includes(setName) || setName.includes(ofName)
-            );
-    
-            return matchingBrowser ? sets[matchingBrowser] : sets['Google Chrome'];
-        }
-    
-    
-        #applyBrowserSpecificStyles(styles, browsername, what, these) {
-            let that = this;
-            const thisBrowser = browsername == null ? this.#determineBrowser() : browsername;
-            const browserSpecificStyles = this.#browserSpecificStyleDefaults(thisBrowser);
-            if (this[what] != null) {
-                if (Array.from(this.#shadow.querySelector('*')).includes(this[what])) {
-                    that = this[what];
-                    this.#applyStyles(browserSpecificStyles, that, these);
-            }};
-        }
-        applyBrowserStyles = (styles = {...Object.entries(this.styles)}, that = this, these = []) => {
-                if (that != null && these != null && Array.isArray(these)) {
-                    these.push(that);
-                } else if (that != null){
-                    these = [that];
-                } else {
-                    these = [];
-                }
-                for (const [property, value] of Object.entries(styles)) {
-                    element.style[property] = value;
-                }
-                if (these.length > 0) {
-                    these.pop();
-                    applyStyles(styles, these[0], these);
-                }
-                return these;
-        };
-    
+
         static createComboInput = (() => { return document.createElement('combo-input'); })();
-    
+
+        attachToForm(form) {
+            this.#attachToForm(form);
+        }
+
+        #attachToForm(form) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = this.getAttribute('name') || 'comboInput';
+            hiddenInput.value = this.state.value;
+            form.appendChild(hiddenInput);
+        }
+        static createComboInputWithOptions(options) {
+            const comboInput = document.createElement('combo-input');
+            comboInput.options = options;
+            return comboInput;
+        }
+
+        static attachAllToForm(form) {
+            const comboInputs = document.querySelectorAll('combo-input');
+            comboInputs.forEach(comboInput => {
+                comboInput.attachToForm(form);
+            });
+        }
+        static formSubmitHandler(event) {
+            const form = event.target;
+            const comboInputs = form.querySelectorAll('combo-input');
+            comboInputs.forEach(comboInput => {
+                comboInput.attachToForm(form);
+            });
+        }
+        setFormSubmitHandler(handler) {
+            this.formSubmitHandler = handler;
+            this.form.addEventListener('submit', this.formSubmitHandler);
+        };
+
+        
     }
-    
+
     customElements.define('combo-input', CustomSelectInput);
+
 document.addEventListener("DOMContentLoaded", () => {
     // Attach custom logic to handle the form integration of combo-input.
     const comboInputs = document.querySelectorAll("combo-input");
@@ -947,3 +856,16 @@ document.addEventListener("DOMContentLoaded", () => {
         syncValue();
     });
 });
+const demoform = document.getElementById('advanced-form');
+            const demooutput = document.getElementById('output');
+            const demoresult = document.getElementById('result');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const formDataObject = {};
+                formData.forEach((value, key) => {
+                    formDataObject[key] = value;
+                });
+                result.textContent = JSON.stringify(formDataObject, null, 2);
+                output.style.display = 'block';
+            });
