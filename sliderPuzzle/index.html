@@ -1,178 +1,225 @@
 <!DOCTYPE html>
-<html>
-  <head> 
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="description" content="CS 2025">
-      <meta name="author" content="C Singendonk">
-
-      <title>CS 2025</title>
-      <link rel="stylesheet" href="https://csingendonk.github.io/htmlpanels/sliderPuzzle/css/style.css">
-  </head>
-  <body id="main-content">
-      <header id="header" class="header-main bar" role="banner">
-          <span class="header-main-title">
-            <h2>CS 2025</h2>
-          </span> 
-          <span class="header-main-menu">
-              <button id="open-puzzle-dlg-btn">Puzzle</button>
-              <button id="open-dice-btn">Dice</button>
-              <button id="help-button">Help</button>
-              <button id="about-button">About</button>
-          </span>
-      </header>
-      <main></main>
-      <script src="https://csingendonk.github.io/htmlpanels/sliderPuzzle/js/loadExternalScripts.js"></script>
-      <script id="ui-interaction-inititializer-script">
-      const helpButton = document.getElementById('help-button');
-      const aboutButton = document.getElementById('about-button');
-      const openPuzzleDlgBtn = document.getElementById('open-puzzle-dlg-btn');
-      const openDiceBtn = document.getElementById('open-dice-btn');
-
-      document.body.popups = [];
-
-      openDiceBtn.addEventListener('click', () => {
-          const iframe = document.createElement('iframe', {is: 'u-frame'});
-          iframe.src = 'https://csingendonk.github.io/htmlpanels/diceroller/index.html';
-          iframe.style.width = '100vw';
-          iframe.style.height = '100vh';
-          iframe.style.border = '2px groove #3f0';
-          iframe.style.position = 'absolute';
-          iframe.style.display = 'block';
-          iframe.style.overflow = 'hidden';
-          iframe.style.flexShrink = '1';
-          iframe.style.resize = 'both';
-          iframe.style.top = '0';
-          iframe.style.left = '0';
-          iframe.style.transform = 'scale(0.75)';
-          iframe.style.transformOrigin = 'top left';
-
-          const container = document.createElement('div');
-          container.style.resize = 'both';
-          container.style.position = 'absolute';
-          container.style.display = 'flex';
-          container.style.overflow = 'hidden';
-          container.style.flexShrink = '1';
-          container.style.top = '0';
-          container.style.left = '0';
-          container.style.width = '100%';
-          container.style.height = '100%';
-
-          const closeButton = document.createElement('button');
-          closeButton.innerText = '❌';
-          closeButton.style.zIndex = Number.MAX_SAFE_INTEGER;
-          closeButton.style.backgroundColor = '#ff000099';
-          closeButton.title = 'Close Dice Roller';
-          closeButton.style.display = 'inline-flex';
-          closeButton.style.position = 'absolute';
-          closeButton.style.top = '0';
-          closeButton.style.right = '25%';
-
-          const dragGrip = document.createElement('drag-grip');
-
-          container.appendChild(closeButton);
-          container.appendChild(dragGrip);
-          container.appendChild(iframe);
-          document.body.appendChild(container);
-
-          closeButton.addEventListener('click', () => {
-              container.remove();
-          });
-      });
-
-
-
-
-            openPuzzleDlgBtn.addEventListener('click', () => {
-                const iframe = document.createElement('iframe', {is: 'u-frame'});
-                iframe.src = "https://csingendonk.github.io/htmlpanels/sliderPuzzle/puzzle.html";
-                iframe.style.width = '100vw';
-                iframe.style.height = '100vh';
-                iframe.style.border = '2px groove #3f0';
-                iframe.style.position = 'absolute';
-                iframe.style.display = 'block';
-                iframe.style.overflow = 'hidden';
-                iframe.style.flexShrink = '1';
-                iframe.style.resize = 'both';
-                iframe.style.top = '0';
-                iframe.style.left = '0';
-                iframe.style.transform = 'scale(0.75)';
-                iframe.style.transformOrigin = 'top left';
-
-                const container = document.createElement('div');
-                container.style.resize = 'both';
-                container.style.position = 'absolute';
-                container.style.display = 'flex';
-                container.style.overflow = 'hidden';
-                container.style.flexShrink = '1';
-                container.style.top = '0';
-                container.style.left = '0';
-                container.style.width = '100%';
-                container.style.height = '100%';
-
-                const closeButton = document.createElement('button');
-                closeButton.innerText = '❌';
-                closeButton.style.zIndex = Number.MAX_SAFE_INTEGER;
-                closeButton.style.backgroundColor = '#ff000099';
-                closeButton.title = 'Close Puzzle';
-                closeButton.style.display = 'inline-flex';
-                closeButton.style.position = 'absolute';
-                closeButton.style.top = '0';
-                closeButton.style.right = '25%';
-
-                const dragGrip = document.createElement('drag-grip');
-
-                container.appendChild(closeButton);
-                container.appendChild(dragGrip);
-                container.appendChild(iframe);
-                document.body.appendChild(container);
-
-                closeButton.addEventListener('click', () => {
-                    container.remove();
-                });
-            });
-
-      function createPopup(title, contentId) {
-          const existingPopup = document.body.popups.find(p => p.title === title);
-          if (existingPopup) {
-              existingPopup.show();
-              return;
-          }
-
-          const contentElement = document.createElement('div');
-          contentElement.id = contentId;
-
-          renderMarkdown(`https://csingendonk.github.io/htmlpanels/sliderPuzzle/misc/${title.toLowerCase()}.md`, contentElement)
-              .then(() => {
-                  const popup = new PopupBox(title, [contentElement], 'option');
-                  document.body.popups.push(popup);
-                  popup.show();
-              })
-              .catch(error => {
-                  console.error(`Error loading the ${title} file:`, error);
-                  alert(`Failed to load the ${title} content.`);
-              });
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS 2025 - Responsive Popup</title>
+  <style>
+    /* Base reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header nav button {
+      background: transparent;
+      border: 2px solid transparent;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+    header nav button:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: #fff;
+    }
+    main {
+      padding: 2rem;
+    }
+    /* Modal overlay: full-screen with centered content */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.active {
+      display: flex;
+    }
+    /* Popup container – now set to 90vw by 90vh */
+    .popup-container {
+      position: fixed;
+      background: #fff;
+      border: 2px solid #3f0;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      width: 90vw;
+      height: 90vh;
+      max-width: 90vw;
+      max-height: 90vh;
+      resize: both;
+      overflow: hidden;
+    }
+    /* Center the container initially */
+    .centered {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    /* Header used for dragging */
+    .popup-header {
+      background: #3f0;
+      color: #fff;
+      padding: 0.5rem;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .popup-header .title {
+      font-size: 1.2rem;
+    }
+    .popup-header .close {
+      background: #999;
+      border: none;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    /* Popup body for content – subtract header height (≈40px) */
+    .popup-body {
+      width: 100%;
+      height: calc(100% - 40px);
+      overflow: hidden;
+    }
+    .popup-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CS 2025</h1>
+    <nav>
+      <button id="puzzle-btn">Puzzle</button>
+      <button id="dice-btn">Dice</button>
+      <button id="help-btn">Help</button>
+      <button id="about-btn">About</button>
+    </nav>
+  </header>
+  <main>
+    <p>Welcome to CS 2025. Choose an option above.</p>
+  </main>
+  
+  <!-- Modal overlay -->
+  <div class="modal" id="modal">
+    <div class="popup-container centered" id="popup-container">
+      <div class="popup-header" id="popup-header">
+        <span class="title" id="popup-title">Popup Title</span>
+        <button class="close" id="popup-close">&times;</button>
+      </div>
+      <div class="popup-body" id="popup-body">
+        <!-- Content (iframe or markdown) loads here -->
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Draggable functionality
+    const popupContainer = document.getElementById('popup-container');
+    const popupHeader = document.getElementById('popup-header');
+    let offsetX, offsetY, isDragging = false;
+    
+    popupHeader.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      const rect = popupContainer.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      // Remove centering transform when dragging starts
+      popupContainer.classList.remove('centered');
+      popupContainer.style.transform = 'none';
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+    
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      popupContainer.style.left = (e.clientX - offsetX) + 'px';
+      popupContainer.style.top = (e.clientY - offsetY) + 'px';
+    }
+    
+    function onMouseUp() {
+      isDragging = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+    
+    // Modal and Content Management
+    const modal = document.getElementById('modal');
+    const popupBody = document.getElementById('popup-body');
+    const popupTitle = document.getElementById('popup-title');
+    const popupClose = document.getElementById('popup-close');
+    
+    function openPopup(title, content, type = 'iframe') {
+      popupTitle.textContent = title;
+      if (type === 'iframe') {
+        popupBody.innerHTML = `<iframe src="${content}"></iframe>`;
+      } else if (type === 'markdown') {
+        // Load markdown content as needed...
+        fetch(content)
+          .then(response => response.text())
+          .then(md => {
+            if (typeof marked !== 'undefined') {
+              popupBody.innerHTML = marked.parse(md);
+            } else {
+              popupBody.innerHTML = `<pre>${md}</pre>`;
+            }
+          })
+          .catch(() => { popupBody.innerHTML = '<p>Error loading content</p>'; });
       }
-
-      helpButton.addEventListener('click', () => createPopup('Help', 'help-content'));
-      aboutButton.addEventListener('click', () => createPopup('About', 'about-content'));
-
-      function renderMarkdown(fileUrl, targetElement) {
-          return fetch(fileUrl)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`Failed to fetch Markdown file: ${response.statusText}`);
-                  }
-                  return response.text();
-              })
-              .then(markdownText => {
-                  if (typeof marked === 'undefined') {
-                      throw new Error('Marked.js library is not loaded.');
-                  }
-                  targetElement.innerHTML = marked.parse(markdownText);
-              });
+      // Reset container size and center it
+      popupContainer.classList.add('centered');
+      popupContainer.style.width = '90vw';
+      popupContainer.style.height = '90vh';
+      modal.classList.add('active');
+    }
+    
+    popupClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+    
+    // Close modal when clicking outside of the popup
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
       }
-      </script>
-
-  </body>
-  </html>
+    });
+    
+    // Button event listeners
+    document.getElementById('puzzle-btn').addEventListener('click', () => {
+      openPopup('Puzzle', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/puzzle.html', 'iframe');
+    });
+    
+    document.getElementById('dice-btn').addEventListener('click', () => {
+      openPopup('Dice', 'https://csingendonk.github.io/htmlpanels/diceroller/index.html', 'iframe');
+    });
+    
+    document.getElementById('help-btn').addEventListener('click', () => {
+      openPopup('Help', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/misc/help.md', 'markdown');
+    });
+    
+    document.getElementById('about-btn').addEventListener('click', () => {
+      openPopup('About', 'https://csingendonk.github.io/htmlpanels/sliderPuzzle/misc/about.md', 'markdown');
+    });
+  </script>
+</body>
+</html>
